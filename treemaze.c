@@ -8,7 +8,7 @@ typedef struct {
     int P2;
 }cellsets_s;
 
-void findneighbours(int P1, int P2, int *neighbours, int *neighbourcount, int **cells, int length) {
+void findneighbours(int P1, int P2, int *neighbours, int *neighbourcount, short **cells, int length) {
 	*neighbourcount = 0;
 	if(P2 + 2 <= length && cells[P1][P2+2] == 0){//Checks all neigbours and puts 1 in array if there ia a free neighbour in that position
 		neighbours[1] = 1;
@@ -28,7 +28,7 @@ void findneighbours(int P1, int P2, int *neighbours, int *neighbourcount, int **
 	}
 }
 
-int searchforcell (int** cells, int length, int* P1, int* P2, int *neighbours, int *neighbourcount){
+int searchforcell (short **cells, int length, int* P1, int* P2, int *neighbours, int *neighbourcount){
 	int start1 = (rand() % (length-1))+1;
 	int start2 = (rand() % (length-1))+1;
 	if(start1 % 2 == 0)
@@ -57,7 +57,7 @@ int searchforcell (int** cells, int length, int* P1, int* P2, int *neighbours, i
 	return 1;
 }
 
-int searchforcell_backtracer (int** cells, int length, int* P1, int* P2, int *neighbours, int *neighbourcount, cellsets_s *cellsets, int counter){
+int searchforcell_backtracer (short** cells, int length, int* P1, int* P2, int *neighbours, int *neighbourcount, cellsets_s *cellsets, int counter){
     while(counter != 0){
         findneighbours(cellsets[counter].P1, cellsets[counter].P2, neighbours, neighbourcount, cells, length);
         if (*neighbourcount != 0){
@@ -70,7 +70,7 @@ int searchforcell_backtracer (int** cells, int length, int* P1, int* P2, int *ne
     return 0;
 }
 
-void generateTree(int **cells, cellsets_s *cellsets, int length) {
+void generateTree(short **cells, cellsets_s *cellsets, int length) {
 	
 	int* neighbours = calloc(4, sizeof(int*));
 	int neighbourcount = 0;
@@ -149,25 +149,7 @@ void generateTree(int **cells, cellsets_s *cellsets, int length) {
 	}
 }
 
-void printTree(int **cells, int length, cellsets_s *cellsets, FILE *fpsvg){
-	fprintf(fpsvg, "<?xml version=\"1.0\"?>\n");
-	fprintf(fpsvg, "<svg width=\"%dcm\" height=\"%dcm\" viewBox=\"0 0 %d %d\"\n", length, length, length*5, length *5);
-	fprintf(fpsvg, "\txmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\">\n");
-	fprintf(fpsvg, "<g>");
-	for (int a = 0; a < length; a++) {
-		for (int b = 0; b < length; b++) {
-			if(cells[a][b] == 1) {
-				fprintf(fpsvg, "<rect x = \"%d\" y = \"%d\" width=\"1\" height=\"1\" style=\"fill:white\" />\n", b, a);		
-			}else{
-				fprintf(fpsvg, "<rect x = \"%d\" y = \"%d\" width=\"1\" height=\"1\" style=\"fill:black\" />\n", b, a);
-			}
-		}
-	}
-	fprintf(fpsvg, "</g>");
-	fprintf(fpsvg, "</svg>\n");
-}
-
-void AddBorders_Tree( int **cells, int length){
+void AddBorders_Tree(short **cells, int length){
 	int flag1, flag2 = 0;
 	
 	for (int b = 0; b < length; b++)
@@ -193,20 +175,10 @@ void AddBorders_Tree( int **cells, int length){
 		cells[d][length-1] = 0;
 }
 
-double treemaze(char *filename, int length, int **maze){
-	FILE *fpsvg = fopen(filename, "w");
-	if(fpsvg == NULL){
-		printf("failed to open file\n");
-		exit(0);
-	}
-
+void treemaze(int length, short **maze){
     cellsets_s *cellsets = calloc((length + 4)*(length + 4), sizeof(cellsets_s));
-
 	 
 	generateTree(maze, cellsets, length - 1);
 	AddBorders_Tree(maze, length);
-	printTree(maze, length, cellsets, fpsvg);
     free(cellsets);
-    double time_spent = 0;//(end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / BILLION;
-    return time_spent;
 }
