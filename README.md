@@ -3,7 +3,7 @@ TalTech Tarkvara Projekt 2022
 
 Hi,
 
-This is a repo for the Software Project course at TalTech for 2022 and its only here to hold and share code more conveniently.
+This is the repo for the Software Project course at TalTech for 2022 and its only here to hold and share code more conveniently.
 It is intended to be a study project exclusively, therefore things can very likely be broken and there is no guarantee of it working at all :P
 
 The final goal is to create a maze creating and solving program with a simple UI using different algorithms, timing and comparing them to eachother.
