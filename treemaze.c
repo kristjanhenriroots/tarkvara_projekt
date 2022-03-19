@@ -3,14 +3,14 @@
 #include <string.h>
 #include <time.h>
 
-typedef struct {
+typedef struct {//struct to number each cell
     int P1;
     int P2;
 }cellsets_s;
 
 void findneighbours(int P1, int P2, int *neighbours, int *neighbourcount, short **cells, int length) {
 	*neighbourcount = 0;
-	if(P2 + 2 <= length && cells[P1][P2+2] == 0){//Checks all neigbours and puts 1 in array if there ia a free neighbour in that position
+	if(P2 + 2 <= length && cells[P1][P2+2] == 0){//Checks all neigbours and puts 1 in array if there is a free neighbour in that position
 		neighbours[1] = 1;
 		(*neighbourcount)++;
 	}
@@ -71,27 +71,27 @@ int searchforcell_backtracer (short** cells, int length, int* P1, int* P2, int *
 }
 
 void generateTree(short **cells, cellsets_s *cellsets, int length) {
-	
-	int* neighbours = calloc(4, sizeof(int*));
-	int neighbourcount = 0;
-	srand(time(NULL));
-	int randneighbour;
-	int counter = 1;
-	int P1 = (rand() % (length-2))+1;
-	int P2 = (rand() % (length-2))+1;
+
+    int *neighbours = calloc(4, sizeof(int *));
+    int neighbourcount = 0;
+    srand(time(NULL));
+    int randneighbour;
+    int counter = 1;
+    int P1 = (rand() % (length - 2)) + 1;
+    int P2 = (rand() % (length - 2)) + 1;
     if (P1 % 2 == 0) {
         P1++;
     }
     if (P2 % 2 == 0) {
         P2++;
     }
-	int cellcounter = 0;
+    int cellcounter = 0;
 
-	cellsets[counter].P1 = P1;
+    cellsets[counter].P1 = P1;
     cellsets[counter].P2 = P2;
     counter++;
     cells[P1][P2] = 1;
-	while(cellcounter <= length*length/2) {
+    while (cellcounter <= length * length / 2) {
         for (int s = 0; s < 4; s++)
             neighbours[s] = 0;
         findneighbours(P1, P2, neighbours, &neighbourcount, cells, length);
@@ -113,7 +113,7 @@ void generateTree(short **cells, cellsets_s *cellsets, int length) {
 
             switch (i - 1) {//goes to neighbour and carves path. Updates P1 and P2 to neighbours position
                 case 0:
-                    cellsets[counter].P1 = P1-2;
+                    cellsets[counter].P1 = P1 - 2;
                     cellsets[counter].P2 = P2;
                     counter++;
                     cells[P1 - 1][P2] = 1;
@@ -121,13 +121,13 @@ void generateTree(short **cells, cellsets_s *cellsets, int length) {
                     break;
                 case 1:
                     cellsets[counter].P1 = P1;
-                    cellsets[counter].P2 = P2+2;
+                    cellsets[counter].P2 = P2 + 2;
                     counter++;
                     cells[P1][P2 + 1] = 1;
                     P2 += 2;
                     break;
                 case 2:
-                    cellsets[counter].P1 = P1+2;
+                    cellsets[counter].P1 = P1 + 2;
                     cellsets[counter].P2 = P2;
                     counter++;
                     cells[P1 + 1][P2] = 1;
@@ -135,18 +135,29 @@ void generateTree(short **cells, cellsets_s *cellsets, int length) {
                     break;
                 case 3:
                     cellsets[counter].P1 = P1;
-                    cellsets[counter].P2 = P2-2;
+                    cellsets[counter].P2 = P2 - 2;
                     counter++;
                     cells[P1][P2 - 1] = 1;
                     P2 -= 2;
                     break;
             }
-
             cellcounter++;
             cells[P1][P2] = 1;
-        }else if (!searchforcell_backtracer(cells, length, &P1, &P2, neighbours, &neighbourcount, cellsets, counter-1)) //if there is no free neighbour cell then search for new starting point, if all cells taken, then exit function
-            return;
-	}
+        } else {
+            if (!(rand() % 4)){//braided maze code part. comment out this bracket for normal backtracer. Without rand no dead ends.
+                if (P2 != length - 1 && cells[P1][P2 + 1] != 1)
+                    cells[P1][P2 + 1] = 1;
+                else if (P1 != length - 1 && cells[P1 + 1][P2] != 1)
+                    cells[P1 + 1][P2] = 1;
+                else if (P1 != 1 && cells[P1 - 1][P2] != 1)
+                    cells[P1 - 1][P2] = 1;
+                else if (P2 != 1 && cells[P1][P2 - 1] != 1)
+                    cells[P1][P2 - 1] = 1;
+            }
+            if (!searchforcell_backtracer(cells, length, &P1, &P2, neighbours, &neighbourcount, cellsets, counter - 1))//if there is no free neighbour cell then search for new starting point, if all cells taken, then exit function
+                return;
+        }
+    }
 }
 
 void AddBorders_Tree(short **cells, int length){
