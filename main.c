@@ -22,7 +22,7 @@ typedef struct dataArr{
 }maze_t;
 
 void Ellermaze(int size, short **maze); // maze generation
-void treemaze(int size, short **maze, short algo);
+void treemaze(int size, short **maze, short algo, short algoloop);
 void findExits(int size, short **maze, short exits[4]); // finding the entrance and exit
 double deadEnd(int size, short **maze, short exits[4]); // using the dead end filler algorithm
 double recursion(int size, short **raw, short **sol, short exits[4]); // recursive backtracker
@@ -165,20 +165,21 @@ double generateMenu(maze_t *M){ // user wanted to generate a maze
         printf("Overwriting previous maze\n");
         freeMemory(M);
     }
-    short algo, algoback;
+    short algo, algoloop;
     printf(" 1: Eller's algorithm\n");
-    printf(" 2: Auris Prääm's TM algorithm\n");
+    printf(" 2: Growing tree backtracer implementation\n");
+    printf(" 3: Growing tree Prim implementation");
     printf("-> ");
     scanf("%hd", &algo);
-    if(algo != 1 && algo != 2){
+    if(algo != 1 && algo != 2 && algo != 3){
         printf("Invalid input\n");
         return 0;
     }
     if(algo == 2){
         printf("1: Without loops\n");
         printf("2: With loops\n");
-        scanf("%hd", &algoback);
-        if(algoback != 1 && algoback != 2){
+        scanf("%hd", &algoloop);
+        if(algoloop != 1 && algoloop != 2){
             printf("Invalid input\n");
             return 0;
         }
@@ -190,9 +191,9 @@ double generateMenu(maze_t *M){ // user wanted to generate a maze
         clock_gettime(CLOCK_REALTIME, &start); // start timer
         Ellermaze(M->size, M->algo[0].maze); // make a maze using Eller's algorithm
     }
-    else if(algo == 2){
+    else if(algo == 2 || algo == 3){
         clock_gettime(CLOCK_REALTIME, &start); // start timer
-        treemaze(M->size, M->algo[0].maze, algoback); // make a maze using Auris Prääm's TM generation algorithm
+        treemaze(M->size, M->algo[0].maze, algo, algoloop); // make a maze using Auris Prääm's TM generation algorithm
     }
     clock_gettime(CLOCK_REALTIME, &end); // stop timer
     printf("Generation successful\n");
