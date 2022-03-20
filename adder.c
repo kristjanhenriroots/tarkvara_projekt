@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void makeSVG(char *filename, int size, short **maze){
+void makeSVG(char *filename, int size, short **maze, short **shortest){
     FILE *svg;
     svg = fopen(filename, "w");
     if(svg == NULL){
@@ -16,7 +16,10 @@ void makeSVG(char *filename, int size, short **maze){
 	for(int a = 0; a < size; a++) {
 		for(int b = 0; b < size; b++){
             value = maze[a][b]; // add every element of every matrix at the same xy
-			if(value == 1) { // must be an unvisited passage
+			if(shortest[a][b] == 1){
+                fprintf(svg, "<rect x = \"%d\" y = \"%d\" width=\"1\" height=\"1\" style=\"fill:blue\" />\n", b, a);
+			}
+			else if(value == 1) { // must be an unvisited passage
 				fprintf(svg, "<rect x = \"%d\" y = \"%d\" width=\"1\" height=\"1\" style=\"fill:white\" />\n", b, a);		
 			}else if(value == 0){ // must be a wall
 				fprintf(svg, "<rect x = \"%d\" y = \"%d\" width=\"1\" height=\"1\" style=\"fill:black\" />\n", b, a);
