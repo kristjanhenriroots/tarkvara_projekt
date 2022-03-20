@@ -177,7 +177,7 @@ double generateMenu(maze_t *M){ // user wanted to generate a maze
     if(algo == 2){
         printf(" 1: Without loops\n");
         printf(" 2: With loops\n");
-        printf(" -> ");
+        printf("-> ");
         scanf("%hd", &algoback);
         if(algoback != 1 && algoback != 2){
             printf("Invalid input\n");
