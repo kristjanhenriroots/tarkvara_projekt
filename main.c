@@ -187,7 +187,7 @@ double generateMenu(maze_t *M){ // user wanted to generate a maze
     }
     clock_gettime(CLOCK_REALTIME, &end); // stop timer
     printf("Generation successful\n");
-    //makeSVG("raw.svg", M->size, M->algo[0].maze); // make an SVG of the raw maze
+    //makeSVG("raw.svg", M->size, M->algo[0].maze, M->algo[3].maze); // make an SVG of the raw maze
     double time_spent = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / BILLION * 1000; // calculate time spent in milliseconds
     if(time_spent > 0.0){
         printf("Generation time %.4f ms\n", time_spent);
