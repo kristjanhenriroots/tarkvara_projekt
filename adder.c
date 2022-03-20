@@ -16,7 +16,10 @@ void makeSVG(char *filename, int size, short **maze, short **shortest){
 	for(int a = 0; a < size; a++) {
 		for(int b = 0; b < size; b++){
             value = maze[a][b]; // add every element of every matrix at the same xy
-			if(shortest[a][b] == 1){
+			if(value == 3){ // passage visited twice aka the recursive backtracer on the dead end filler
+                fprintf(svg, "<rect x = \"%d\" y = \"%d\" width=\"1\" height=\"1\" style=\"fill:purple\" />\n", b, a);
+            }
+			else if(shortest[a][b] == 1){
                 fprintf(svg, "<rect x = \"%d\" y = \"%d\" width=\"1\" height=\"1\" style=\"fill:blue\" />\n", b, a);
 			}
 			else if(value == 1) { // must be an unvisited passage
@@ -26,9 +29,7 @@ void makeSVG(char *filename, int size, short **maze, short **shortest){
 			}else if(value == 2){ // passage visited once
 				fprintf(svg, "<rect x = \"%d\" y = \"%d\" width=\"1\" height=\"1\" style=\"fill:red\" />\n", b, a);
 			}
-            else if(value == 3){ // passage visited twice aka the recursive backtracer on the dead end filler
-                fprintf(svg, "<rect x = \"%d\" y = \"%d\" width=\"1\" height=\"1\" style=\"fill:purple\" />\n", b, a);
-            }
+            
 		}
 	}
 	fprintf(svg, "</g>"); // SVG footer
