@@ -70,7 +70,7 @@ int searchforcell_backtracer (short** cells, int length, int* P1, int* P2, int *
     return 0;
 }
 
-void generateTree(short **cells, cellsets_s *cellsets, int length) {
+void generateTree(short **cells, cellsets_s *cellsets, int length, short algo) {
 
     int *neighbours = calloc(4, sizeof(int *));
     int neighbourcount = 0;
@@ -144,15 +144,17 @@ void generateTree(short **cells, cellsets_s *cellsets, int length) {
             cellcounter++;
             cells[P1][P2] = 1;
         } else {
-            if (!(rand() % 4)){//braided maze code part. comment out this bracket for normal backtracer. Without rand no dead ends.
-                if (P2 != length - 1 && cells[P1][P2 + 1] != 1)
-                    cells[P1][P2 + 1] = 1;
-                else if (P1 != length - 1 && cells[P1 + 1][P2] != 1)
-                    cells[P1 + 1][P2] = 1;
-                else if (P1 != 1 && cells[P1 - 1][P2] != 1)
-                    cells[P1 - 1][P2] = 1;
-                else if (P2 != 1 && cells[P1][P2 - 1] != 1)
-                    cells[P1][P2 - 1] = 1;
+            if (algo == 2) {
+                if (!(rand() % 4)) {//braided maze code part. comment out this bracket for normal backtracer. Without rand no dead ends.
+                    if (P2 != length - 1 && cells[P1][P2 + 1] != 1)
+                        cells[P1][P2 + 1] = 1;
+                    else if (P1 != length - 1 && cells[P1 + 1][P2] != 1)
+                        cells[P1 + 1][P2] = 1;
+                    else if (P1 != 1 && cells[P1 - 1][P2] != 1)
+                        cells[P1 - 1][P2] = 1;
+                    else if (P2 != 1 && cells[P1][P2 - 1] != 1)
+                        cells[P1][P2 - 1] = 1;
+                }
             }
             if (!searchforcell_backtracer(cells, length, &P1, &P2, neighbours, &neighbourcount, cellsets, counter - 1))//if there is no free neighbour cell then search for new starting point, if all cells taken, then exit function
                 return;
@@ -186,10 +188,10 @@ void AddBorders_Tree(short **cells, int length){
 		cells[d][length-1] = 0;
 }
 
-void treemaze(int length, short **maze){
+void treemaze(int length, short **maze, short algo){
     cellsets_s *cellsets = calloc((length + 4)*(length + 4), sizeof(cellsets_s));
 	 
-	generateTree(maze, cellsets, length - 1);
+	generateTree(maze, cellsets, length - 1, algo);
 	AddBorders_Tree(maze, length);
     free(cellsets);
 }
