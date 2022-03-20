@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 #define BILLION  1000000000.0
-
+int moves;
 // https://www.codesdope.com/blog/article/backtracking-to-solve-a-rat-in-a-maze-c-java-pytho/
 int solvemaze(int y, int x, int endy, int endx, int size, short **maze, short **solution, short **helper){
     // checking if it has reached the end
@@ -16,6 +16,7 @@ int solvemaze(int y, int x, int endy, int endx, int size, short **maze, short **
     if(y >= 0 && x >= 0 && y < size && x < size && solution[y][x] == 0 && maze[y][x] == 1 && helper[y][x] == 0){
         solution[y][x] = 1;
         helper[y][x] = 1;
+        moves += 1;
         //going down
         if(solvemaze(y + 1, x, endy, endx, size, maze, solution, helper))
             return 1;
@@ -29,6 +30,7 @@ int solvemaze(int y, int x, int endy, int endx, int size, short **maze, short **
         if(solvemaze(y, x - 1, endy, endx, size, maze, solution, helper))
             return 1;
         //backtracking
+        moves--;
         solution[y][x] = 0; // can't go anywhere, dead end, go back
         return 0;
     }
@@ -38,6 +40,7 @@ int solvemaze(int y, int x, int endy, int endx, int size, short **maze, short **
 
 double recursion(int size, short **raw, short **sol, short exits[4]){
     struct timespec start, end;
+    moves = 0;
     clock_gettime(CLOCK_REALTIME, &start); // start timer
     short **helper;
     helper = (short**)calloc(size, size * sizeof(short*));
@@ -49,5 +52,6 @@ double recursion(int size, short **raw, short **sol, short exits[4]){
     clock_gettime(CLOCK_REALTIME, &end); // stop timer
     // time_spent = end - start
     double time_spent = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / BILLION * 1000;
+    printf("Rec solution lenght %d squares\n", moves + 1);
     return time_spent;
 }

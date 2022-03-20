@@ -179,7 +179,7 @@ double generateMenu(maze_t *M){ // user wanted to generate a maze
         printf("1: Without loops\n");
         printf("2: With loops\n");
         scanf("%hd", &algoloop);
-        if(algoloop != 1 && algoloop != 2){
+        if(algoloop != 1 && algoloop != 2){      
             printf("Invalid input\n");
             return 0;
         }
@@ -197,7 +197,7 @@ double generateMenu(maze_t *M){ // user wanted to generate a maze
     }
     clock_gettime(CLOCK_REALTIME, &end); // stop timer
     printf("Generation successful\n");
-    //makeSVG("raw.svg", M->size, M->algo[0].maze); // make an SVG of the raw maze
+    //makeSVG("raw.svg", M->size, M->algo[0].maze, M->algo[3].maze); // make an SVG of the raw maze
     double time_spent = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / BILLION * 1000; // calculate time spent in milliseconds
     if(time_spent > 0.0){
         printf("Generation time %.4f ms\n", time_spent);
@@ -240,12 +240,14 @@ int solveMenu(maze_t *M){ // user wants to solve a maze
     tbfs = bfs(M->size, M->algo[0].maze, M->algo[3].maze, M->exits); // measuring time and solving
     printf("Breath first search %.4f ms\n", tbfs);
 
-    
-    for(i = 0; i < M->algoCount - 1; i++)
+    for(i = 0; i < M->algoCount - 1; i++){
+        if(i == 1)
+            continue;
         for(j = 0; j < M->size; j++)
             for(k = 0; k < M->size; k++)
                 M->algo[M->algoCount - 1].maze[j][k] +=  M->algo[i].maze[j][k]; // adding all layers up for the final solution
-    
+    }
+        
     makeSVG("solved.svg", M->size, M->algo[M->algoCount - 1].maze, M->algo[3].maze); // make an SVG of the solution
     makeBMP(M->size, M->algo[M->algoCount - 1].maze, M->algo[3].maze); // also make a BMP
 

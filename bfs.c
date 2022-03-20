@@ -64,11 +64,12 @@ int dequeue(struct Queue* queue){
 
 // finding the path of the shortest solution after the search has reached the end
 void findPath(int size, short **sol, short adjacent[size][size], short previous[size][size], short exits[4]){ 
+    int moves = 0;
     int x = exits[2], y = exits[3];
     int next = previous[exits[3]][exits[2]]; // first position is the exit
     while(x != exits[0] || y != exits[1]){ // until it reaches the entrance
         sol[y][x] = 1; // mark it as a path on the solution maze
-        
+        moves++;
         // checking all sides
         if(y > 0 && adjacent[y - 1][x] == next)
             y--;
@@ -80,7 +81,9 @@ void findPath(int size, short **sol, short adjacent[size][size], short previous[
             y++;
         next = previous[y][x]; // next position
     }
+    moves++;
     sol[y][x] = 1; // marking the beginning as a path as well
+    printf("BFS solution lenght %d squares\n", moves);
 }
 
 int solve(int size, short **raw, short **sol, short exits[4]){
@@ -108,6 +111,7 @@ int solve(int size, short **raw, short **sol, short exits[4]){
     while(rowqueue->size > 0){ // works until there are nodes to visit
         r = dequeue(rowqueue); // take the current position off the queue, no need to visit it again
         c = dequeue(colqueue);
+        nr++;
         if(r == exits[3] && c == exits[2]){ // check if reached the exit
             printf("starting pathfinding\n");
             findPath(size, sol, adjacent, previous, exits); // find the shortest way back
