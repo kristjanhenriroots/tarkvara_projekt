@@ -46,11 +46,13 @@ int round4(int x) {
     return x % 4 == 0 ? x : x - x % 4 + 4;
 }
 
-int makeBMP(int height, int **maze){
-    
+int makeBMP(int height, short **maze, short **shortest){
+    int original = height;
     int width;
-    int dpi = 100000;
-    
+    int dpi = 1000;
+    int upscale_factor = 3000 / height;
+    height *= upscale_factor;
+    printf("upscaling x%d to %d\n", upscale_factor, height);
     width = height;
 
     int padded_width = round4(width * 3);
@@ -80,30 +82,40 @@ int makeBMP(int height, int **maze){
 
     fwrite(&bfh, 1, 14, f);
     fwrite(&bih, 1, sizeof(bih), f); // kirjutan headeri
-    int startx = 0;
-    int starty = 0;
 
-    
+    int idx = 0, idy = 0;
     char white[] = {255,255,255};
     char black[] = {0,0,0};
     char purple[] = {128,0,128};
+    char blue[] = {255, 0, 0};
+    char red[] = {0, 0, 255};
     char *bitmap = (char *) malloc(bih.image_size * sizeof(char));
     for (int i = 0; i < image_size; i++) bitmap[i] = 255;
     // For each pixel in the RGB image...
-    for (int row = starty; row < height - starty; row++) {
-        for (int col = startx; col < width - startx; col++) {
+    for (int row = 0; row < height; row++) {
+        if(row / upscale_factor == 0)
+            idy = 0;
+        else
+            idy = row / upscale_factor;
+        for (int col = 0; col < width; col++) {
             // For R, G, and B...
+            if(col / upscale_factor == 0)
+                idx = 0;
+            else
+                idx = col / upscale_factor;
+            //printf("%d %d : %d %d\n", row, col, idy, idx);
             for (int color = 0; color < 3; color++) {
                 int index = row * padded_width + col * 3 + color;
-                if(maze[row][col] == 0){
-                    bitmap[index] = black[color];
-                }
-                else if(maze[row][col] == 1){
-                    bitmap[index] = white[color];
-                }
-                else{
+                if(maze[original - 1 - idy][idx] == 3)
                     bitmap[index] = purple[color];
-                }
+                else if(shortest[original - 1 - idy][idx] == 1)
+                    bitmap[index] = blue[color];
+                else if(maze[original - 1 - idy][idx] == 0)
+                    bitmap[index] = black[color];
+                else if(maze[original - 1 - idy][idx] == 1)
+                    bitmap[index] = white[color];
+                else if(maze[original - 1 - idy][idx] == 2)
+                    bitmap[index] = red[color];
             }
             
         }
