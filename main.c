@@ -230,12 +230,14 @@ int solveMenu(maze_t *M){ // user wants to solve a maze
     tbfs = bfs(M->size, M->algo[0].maze, M->algo[3].maze, M->exits); // measuring time and solving
     printf("Breath first search %.4f ms\n", tbfs);
 
-    
-    for(i = 0; i < M->algoCount - 1; i++)
+    for(i = 0; i < M->algoCount - 1; i++){
+        if(i == 1)
+            continue;
         for(j = 0; j < M->size; j++)
             for(k = 0; k < M->size; k++)
                 M->algo[M->algoCount - 1].maze[j][k] +=  M->algo[i].maze[j][k]; // adding all layers up for the final solution
-    
+    }
+        
     makeSVG("solved.svg", M->size, M->algo[M->algoCount - 1].maze, M->algo[3].maze); // make an SVG of the solution
     makeBMP(M->size, M->algo[M->algoCount - 1].maze); // also make a BMP
 
