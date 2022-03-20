@@ -22,7 +22,7 @@ typedef struct dataArr{
 }maze_t;
 
 void Ellermaze(int size, short **maze); // maze generation
-void treemaze(int size, short **maze);
+void treemaze(int size, short **maze, short algo);
 void findExits(int size, short **maze, short exits[4]); // finding the entrance and exit
 double deadEnd(int size, short **maze, short exits[4]); // using the dead end filler algorithm
 double recursion(int size, short **raw, short **sol, short exits[4]); // recursive backtracker
@@ -165,7 +165,7 @@ double generateMenu(maze_t *M){ // user wanted to generate a maze
         printf("Overwriting previous maze\n");
         freeMemory(M);
     }
-    short algo;
+    short algo, algoback;
     printf(" 1: Eller's algorithm\n");
     printf(" 2: Auris Prääm's TM algorithm\n");
     printf("-> ");
@@ -173,6 +173,16 @@ double generateMenu(maze_t *M){ // user wanted to generate a maze
     if(algo != 1 && algo != 2){
         printf("Invalid input\n");
         return 0;
+    }
+    if(algo == 2){
+        printf(" 1: Without loops\n");
+        printf(" 2: With loops\n");
+        printf(" -> ");
+        scanf("%hd", &algoback);
+        if(algoback != 1 && algoback != 2){
+            printf("Invalid input\n");
+            return 0;
+        }
     }
     if(getSize(M) == 0) // get the size the user wants
         return 0;
@@ -183,7 +193,7 @@ double generateMenu(maze_t *M){ // user wanted to generate a maze
     }
     else if(algo == 2){
         clock_gettime(CLOCK_REALTIME, &start); // start timer
-        treemaze(M->size, M->algo[0].maze); // make a maze using Auris Prääm's TM generation algorithm 
+        treemaze(M->size, M->algo[0].maze, algoback); // make a maze using Auris Prääm's TM generation algorithm
     }
     clock_gettime(CLOCK_REALTIME, &end); // stop timer
     printf("Generation successful\n");
