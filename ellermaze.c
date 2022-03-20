@@ -29,7 +29,7 @@ void generateEller(short **cells, short **cellsets, int size) {
 		for(int b = 1; b < size-2; b += 2){ 
 			if (i == size - 1){
 				if (cellsets[i][b] == cellsets[i][b+2]) 
-					cells[i][b+1] = 1;
+					cells[i][b+1] = 0;
 				else{
 					setbuf = cellsets[i][b+2];
 					setcount = 1;
@@ -59,11 +59,11 @@ void generateEller(short **cells, short **cellsets, int size) {
 						}
 					}
 				}else{
-					cells[i][b+1] = 1; //add wall between sets
+					cells[i][b+1] = 0; //add wall between sets
 					cellsets[i][b+1] = 1;
 				}
 			}else{
-				cells[i][b+1] = 1;
+				cells[i][b+1] = 0;
 				cellsets[i][b+1] = 1;//if they are already equal then wall is needed (already done before)
 		
 			}
@@ -72,7 +72,7 @@ void generateEller(short **cells, short **cellsets, int size) {
 		
 		
 		for (int c = 1; c < size; c += 2) {
-			cells[i+1][c+1] = 1; //add walls between row and column sets for filler
+			cells[i+1][c+1] = 0; //add walls between row and column sets for filler
 			cellsets[i+1][c+1] = 1;
 			if (cellsets[i][c] == cellsets[i][c+2] && c != size - 1){//if sets are same. find whole set from row
 				setcounter += 2;
@@ -87,7 +87,7 @@ void generateEller(short **cells, short **cellsets, int size) {
 					}else if (rand() % 2) {
 						cellsets[i+2][c - setcounter + d] = cellsets[i][c - setcounter +d]; //make path and assing above value to bottom set
 					}else{
-						cells[i+1][c - setcounter + d] = 1; //if not make path
+						cells[i+1][c - setcounter + d] = 0; //if not make path
 						cellsets[i+1][c - setcounter + d] = 1;
 						wallcounter += 2;
 					}	
@@ -103,40 +103,41 @@ void addBorders_Eller( short **cells, int size){
 	int flag1, flag2 = 0;
 	
 	for (int b = 0; b < size; b++)
-		cells[b][0] = 1;
+		cells[b][0] = 0;
 	
 	for (int a = 0; a < size; a++){
-		cells[0][a] = 1;
-		if (cells[1][a] == 0 && flag1 == 0) {
-			cells[0][a] = 0;
+		cells[0][a] = 0;
+		if (cells[1][a] == 1 && flag1 == 0) {
+			cells[0][a] = 1;
 			flag1 = 1;
 		}
 	}
 	
 	for (int c = size-2; c >= 0; c--){
-		cells[size - 1][c] = 1;
-		if (cells[size - 2][c] == 0 && flag2 == 0) {
-			cells[size - 1][c] = 0;
+		cells[size - 1][c] = 0;
+		if (cells[size - 2][c] == 1 && flag2 == 0) {
+			cells[size - 1][c] = 1;
 			flag2 = 1;
 		}
 	}
 	
 	for (int d = 0; d < size; d++)
-		cells[d][size - 1] = 1;
+		cells[d][size - 1] = 0;
 }
 
 void Ellermaze(int size, short **maze){
 	int i, j;
-	short **cellsets = calloc(size + 4, sizeof(short*));
+	short **cellsets = calloc(size+4, sizeof(short*));
 	for(i = 0; i < size + 4; i++) {
-		cellsets[i] = calloc(size + 4, sizeof(short));
+		cellsets[i] = calloc(size+4, sizeof(short));
 	}
+    for(i = 0; i < size; i++) {
+        for (j = 0; j < size; j++) {
+            maze[i][j] = 1;
+        }
+    }
 	generateEller(maze, cellsets, size - 1);
 	addBorders_Eller(maze, size);
-	for(i = 0; i < size; i++)
-		for(j = 0; j < size; j++)
-			maze[i][j] = abs(maze[i][j] - 1);
-			
 	for(i = 0; i < size + 4; i++){
 		free(cellsets[i]);
 	}
