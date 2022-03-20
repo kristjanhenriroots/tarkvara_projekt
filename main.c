@@ -168,7 +168,7 @@ double generateMenu(maze_t *M){ // user wanted to generate a maze
     short algo, algoloop;
     printf(" 1: Eller's algorithm\n");
     printf(" 2: Growing tree backtracer implementation\n");
-    printf(" 3: Growing tree Prim implementation");
+    printf(" 3: Growing tree Prim implementation\n");
     printf("-> ");
     scanf("%hd", &algo);
     if(algo != 1 && algo != 2 && algo != 3){
