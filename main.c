@@ -26,7 +26,8 @@ void treemaze(int size, short **maze);
 void findExits(int size, short **maze, short exits[4]); // finding the entrance and exit
 double deadEnd(int size, short **maze, short exits[4]); // using the dead end filler algorithm
 double recursion(int size, short **raw, short **sol, short exits[4]); // recursive backtracker
-void makeSVG(char *filename, int size, short **maze); // making the SVG file
+double bfs(int size, short **raw, short **sol, short exits[4]);
+void makeSVG(char *filename, int size, short **maze, short **shortest); // making the SVG file
 int makeBMP(int height, short **maze); // experimental, BMP file creation
 
 int sizeCheck(int size){
@@ -186,7 +187,7 @@ double generateMenu(maze_t *M){ // user wanted to generate a maze
     }
     clock_gettime(CLOCK_REALTIME, &end); // stop timer
     printf("Generation successful\n");
-    makeSVG("raw.svg", M->size, M->algo[0].maze); // make an SVG of the raw maze
+    //makeSVG("raw.svg", M->size, M->algo[0].maze); // make an SVG of the raw maze
     double time_spent = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / BILLION * 1000; // calculate time spent in milliseconds
     if(time_spent > 0.0){
         printf("Generation time %.4f ms\n", time_spent);
@@ -213,7 +214,7 @@ int solveMenu(maze_t *M){ // user wants to solve a maze
         return 0;
     }
     int i, j, k;
-    double tdead, trec; // solving times
+    double tdead, trec, tbfs; // solving times
     for(j = 0; j < M->size; j++){
         for(k = 0; k < M->size; k++){
             M->algo[1].maze[j][k] = M->algo[0].maze[j][k]; // copy the values for dead end filler, it will destroy the original
@@ -221,13 +222,21 @@ int solveMenu(maze_t *M){ // user wants to solve a maze
     }
     findExits(M->size, M->algo[0].maze, M->exits); // does it have an exit?
     tdead = deadEnd(M->size, M->algo[1].maze, M->exits);
+    printf("Dead end solution %.4fms\n", tdead);
+
     trec = recursion(M->size, M->algo[0].maze, M->algo[2].maze, M->exits); // measuring time and solving
+    printf("Recursive backtracker %.4fms\n", trec);
+
+    tbfs = bfs(M->size, M->algo[0].maze, M->algo[3].maze, M->exits); // measuring time and solving
+    printf("Breath first search %.4f ms\n", tbfs);
+
+    
     for(i = 0; i < M->algoCount - 1; i++)
         for(j = 0; j < M->size; j++)
             for(k = 0; k < M->size; k++)
                 M->algo[M->algoCount - 1].maze[j][k] +=  M->algo[i].maze[j][k]; // adding all layers up for the final solution
     
-    makeSVG("solved.svg", M->size, M->algo[M->algoCount - 1].maze); // make an SVG of the solution
+    makeSVG("solved.svg", M->size, M->algo[M->algoCount - 1].maze, M->algo[3].maze); // make an SVG of the solution
     makeBMP(M->size, M->algo[M->algoCount - 1].maze); // also make a BMP
 
     /*
@@ -241,8 +250,6 @@ int solveMenu(maze_t *M){ // user wants to solve a maze
     }
     */
     
-    printf("Dead end solution %.4fms\n", tdead);
-    printf("Recursive backtracker %.4fms\n", trec);
     printf("Solving complete, see program directory for raw.svg and solved.svg\n");
     return 0;
 }
@@ -251,7 +258,7 @@ int main(void){
     int inloop = 1, solved = 0;
     maze_t M;
 	//getSize(&M);
-    M.algoCount = 4; // current nr
+    M.algoCount = 5; // current nr
     M.size = 0;
     printMain(); // print the commands
     while(inloop){
