@@ -113,10 +113,12 @@ int readFile(maze_t *M){ // reading maze from a file
                 printf("Maze is already solved!\n");
                 return 0;
             }
+            /*
             if(i != 0 && i != 1){ // thats not our maze file!
                 printf("Incorrect file!!\n");
                 return 0;
-            }  
+            } 
+            */ 
         }
     }
     printf("Maze read from %s\n", filename);
@@ -332,7 +334,10 @@ int main(void){
                     printf("Generate something first ;)\n");
                     break;
                 }
-                makeBMP(M.size, M.algo[final_maze].maze, secret, solved);
+                if(solved == 1)
+                    makeBMP(M.size, M.algo[final_maze].maze, secret, solved);
+                else
+                    makeBMP(M.size, M.algo[generated].maze, secret, solved);
                 break;
         }
     }
