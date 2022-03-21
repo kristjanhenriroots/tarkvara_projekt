@@ -3,6 +3,7 @@
 #include <string.h>
 #include <time.h>
 
+void addBorders(short **cells, int size);//prototype
 typedef struct {//struct to number each cell
     int P1;
     int P2;
@@ -168,36 +169,10 @@ void generateTree(short **cells, cellsets_s *cellsets, int length, short algo, s
     }
 }
 
-void AddBorders_Tree(short **cells, int length){
-	int flag1, flag2 = 0;
-	
-	for (int b = 0; b < length; b++)
-		cells[b][0] = 0;
-	
-	for (int a = 0; a < length; a++){
-		cells[0][a] = 0;
-		if (cells[1][a] == 1 && flag1 == 0) {
-			cells[0][a] = 1;
-			flag1 = 1;
-		}
-	}
-	
-	for (int c = length-2; c >= 0; c--){
-		cells[length - 1][c] = 0;
-		if (cells[length - 2][c] == 1 && flag2 == 0) {
-			cells[length - 1][c] = 1;
-			flag2 = 1;
-		}
-	}
-	
-	for (int d = 0; d < length; d++)
-		cells[d][length-1] = 0;
-}
 
 void treemaze(int length, short **maze, short algo, short algoloop){
     cellsets_s *cellsets = calloc((length + 4)*(length + 4), sizeof(cellsets_s));
-	 
 	generateTree(maze, cellsets, length - 1, algo, algoloop);
-	AddBorders_Tree(maze, length);
+	addBorders(maze, length);
     free(cellsets);
 }

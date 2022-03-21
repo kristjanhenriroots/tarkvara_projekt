@@ -30,6 +30,7 @@ double bfs(int size, short **raw, short **sol, short exits[4]);
 void makeSVG(char *filename, int size, short **maze, short **shortest); // making the SVG file
 int makeBMP(int height, short **maze, short **shortest); // experimental, BMP file creation
 
+
 int sizeCheck(int size){
     if(size < MAZEMIN || size > MAZEMAX || size % 2 == 0){
         printf("Not allowed size!\n");
