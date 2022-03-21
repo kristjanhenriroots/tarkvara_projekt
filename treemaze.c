@@ -30,14 +30,10 @@ void findneighbours(int P1, int P2, int *neighbours, int *neighbourcount, short 
 	}
 }
 
-int searchforcell (short **cells, int length, int* P1, int* P2, int *neighbours, int *neighbourcount, cellsets_s *cellsets, int counter){
+int searchforcell (short **cells, int length, int* P1, int* P2, int *neighbours, int *neighbourcount, cellsets_s *cellsets, int counter, int visited[length*length/2]){
     int countbuf = 1;
     int visitedlength = counter;
-    int visited[counter+1];
-    while(countbuf <= counter) {//fills array with available cells
-        visited[countbuf] = countbuf;
-        countbuf++;
-    }
+
     countbuf = (rand() % (visitedlength)) + 1;//picks an available cell from array
 	int start1 = cellsets[visited[countbuf]].P1;
 	int start2 = cellsets[visited[countbuf]].P2;
@@ -78,6 +74,7 @@ void generateTree(short **cells, cellsets_s *cellsets, int length, short algo, s
     srand(time(NULL));
     int randneighbour;
     int counter = 1;//counter to keep track of visited cells
+    int visited[length*length/2];
     int P1 = (rand() % (length - 2)) + 1;//pick starting cell
     int P2 = (rand() % (length - 2)) + 1;
     if (P1 % 2 == 0) {//cell location must be uneven
@@ -90,6 +87,7 @@ void generateTree(short **cells, cellsets_s *cellsets, int length, short algo, s
 
     cellsets[counter].P1 = P1;//save first cell position
     cellsets[counter].P2 = P2;
+    visited[counter] = counter;
     counter++;
     cells[P1][P2] = 1;
     while (cellcounter <= length * length / 2) {//loops until all cells have been visited
@@ -110,7 +108,7 @@ void generateTree(short **cells, cellsets_s *cellsets, int length, short algo, s
                     i++;
                 }
             }
-
+            visited[counter] = counter;
             switch (i - 1) {//goes to neighbour and carves path. Updates P1 and P2 to neighbours position
                 case 0:
                     cellsets[counter].P1 = P1 - 2;
@@ -157,7 +155,7 @@ void generateTree(short **cells, cellsets_s *cellsets, int length, short algo, s
                 }
             }
             if (algo == 3) {//to differentiate maze generation algorithm
-                if (!searchforcell(cells, length, &P1, &P2, neighbours, &neighbourcount, cellsets, counter -1))//if there is no free neighbour cell then search for new starting point, if all cells taken, then exit function
+                if (!searchforcell(cells, length, &P1, &P2, neighbours, &neighbourcount, cellsets, counter -1, visited))//if there is no free neighbour cell then search for new starting point, if all cells taken, then exit function
                     return;
             }else{
                 if (!searchforcell_backtracer(cells, length, &P1, &P2, neighbours, &neighbourcount, cellsets, counter - 1))//if there is no free neighbour cell then search for new starting point, if all cells taken, then exit function
