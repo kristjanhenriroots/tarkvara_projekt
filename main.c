@@ -166,7 +166,7 @@ void printMain(){ // Commands
 
 double generateMenu(maze_t *M){ // user wanted to generate a maze
     struct timespec start, end; // keep accurate time
-    enum genalgo{eller, tree, prim};
+    enum genalgo{null, eller, tree, prim};
     if(M->size > 0){ // something is already generated
         printf("Overwriting previous maze\n");
         freeMemory(M);
