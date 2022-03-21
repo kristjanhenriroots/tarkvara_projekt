@@ -99,7 +99,7 @@ void generateEller(short **cells, short **cellsets, int size) {
 	}
 }
 
-void addBorders_Eller( short **cells, int size){
+void addBorders( short **cells, int size){
 	int flag1, flag2 = 0;
 	
 	for (int b = 0; b < size; b++)
@@ -137,7 +137,7 @@ void Ellermaze(int size, short **maze){
         }
     }
 	generateEller(maze, cellsets, size - 1);
-	addBorders_Eller(maze, size);
+	addBorders(maze, size);
 	for(i = 0; i < size + 4; i++){
 		free(cellsets[i]);
 	}
