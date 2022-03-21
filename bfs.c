@@ -68,7 +68,7 @@ void findPath(int size, short **sol, short adjacent[size][size], short previous[
     int x = exits[2], y = exits[3];
     int next = previous[exits[3]][exits[2]]; // first position is the exit
     while(x != exits[0] || y != exits[1]){ // until it reaches the entrance
-        sol[y][x] = 1; // mark it as a path on the solution maze
+        sol[y][x] = 2; // mark it as a path on the solution maze
         moves++;
         // checking all sides
         if(y > 0 && adjacent[y - 1][x] == next)
@@ -82,7 +82,7 @@ void findPath(int size, short **sol, short adjacent[size][size], short previous[
         next = previous[y][x]; // next position
     }
     moves++;
-    sol[y][x] = 1; // marking the beginning as a path as well
+    sol[y][x] = 2; // marking the beginning as a path as well
     printf("BFS solution lenght %d squares\n", moves);
 }
 
