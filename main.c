@@ -21,6 +21,9 @@ typedef struct dataArr{
     data_t *algo; // array of maze matrixes
 }maze_t;
 
+// lets make the code more readable
+enum algoArr{generated, deadend, recursive, breath_first, final_maze}; // the same order the mazes are in the struct array
+
 void Ellermaze(int size, short **maze); // maze generation
 void treemaze(int size, short **maze, short algo, short algoloop);
 void findExits(int size, short **maze, short exits[4]); // finding the entrance and exit
@@ -29,6 +32,7 @@ double recursion(int size, short **raw, short **sol, short exits[4]); // recursi
 double bfs(int size, short **raw, short **sol, short exits[4]);
 void makeSVG(char *filename, int size, short **maze, short **shortest); // making the SVG file
 int makeBMP(int height, short **maze, short **shortest); // experimental, BMP file creation
+
 
 int sizeCheck(int size){
     if(size < MAZEMIN || size > MAZEMAX || size % 2 == 0){
@@ -120,7 +124,7 @@ int writeFile(maze_t *M, int solved){ // writing to a txt file
         } 
     }
     if(ans > 1){ // solution is saved
-        save = M->algoCount - 1;
+        save = final_maze;
         printf("Enter filename where to write solution: ");
     }
     else{ // unsolved maze is saved
@@ -157,10 +161,12 @@ void printMain(){ // Commands
         "H: Help\n"
         "X: Exit\n");
         // 5: free memory (for now)
+        // secret: secret menu :o
 }
 
 double generateMenu(maze_t *M){ // user wanted to generate a maze
     struct timespec start, end; // keep accurate time
+    enum genalgo{eller, tree, prim};
     if(M->size > 0){ // something is already generated
         printf("Overwriting previous maze\n");
         freeMemory(M);
@@ -171,13 +177,14 @@ double generateMenu(maze_t *M){ // user wanted to generate a maze
     printf(" 3: Growing tree Prim implementation\n");
     printf("-> ");
     scanf("%hd", &algo);
-    if(algo != 1 && algo != 2 && algo != 3){
+    if(algo != eller && algo != tree && algo != prim){
         printf("Invalid input\n");
         return 0;
     }
     if(algo == 2){
-        printf("1: Without loops\n");
-        printf("2: With loops\n");
+        printf(" 1: Without loops\n");
+        printf(" 2: With loops\n");
+        printf("-> ");
         scanf("%hd", &algoloop);
         if(algoloop != 1 && algoloop != 2){      
             printf("Invalid input\n");
@@ -187,11 +194,11 @@ double generateMenu(maze_t *M){ // user wanted to generate a maze
     if(getSize(M) == 0) // get the size the user wants
         return 0;
     feedMemory(M); // give sufficient memory
-    if(algo == 1){
+    if(algo == eller){
         clock_gettime(CLOCK_REALTIME, &start); // start timer
         Ellermaze(M->size, M->algo[0].maze); // make a maze using Eller's algorithm
     }
-    else if(algo == 2 || algo == 3){
+    else if(algo == tree || algo == prim){
         clock_gettime(CLOCK_REALTIME, &start); // start timer
         treemaze(M->size, M->algo[0].maze, algo, algoloop); // make a maze using Auris Prääm's TM generation algorithm
     }
@@ -230,26 +237,26 @@ int solveMenu(maze_t *M){ // user wants to solve a maze
             M->algo[1].maze[j][k] = M->algo[0].maze[j][k]; // copy the values for dead end filler, it will destroy the original
         }
     }
-    findExits(M->size, M->algo[0].maze, M->exits); // does it have an exit?
-    tdead = deadEnd(M->size, M->algo[1].maze, M->exits);
+    findExits(M->size, M->algo[generated].maze, M->exits); // does it have an exit?
+    tdead = deadEnd(M->size, M->algo[deadend].maze, M->exits);
     printf("Dead end solution %.4fms\n", tdead);
 
-    trec = recursion(M->size, M->algo[0].maze, M->algo[2].maze, M->exits); // measuring time and solving
+    trec = recursion(M->size, M->algo[generated].maze, M->algo[recursive].maze, M->exits); // measuring time and solving
     printf("Recursive backtracker %.4fms\n", trec);
 
-    tbfs = bfs(M->size, M->algo[0].maze, M->algo[3].maze, M->exits); // measuring time and solving
+    tbfs = bfs(M->size, M->algo[generated].maze, M->algo[breath_first].maze, M->exits); // measuring time and solving
     printf("Breath first search %.4f ms\n", tbfs);
 
-    for(i = 0; i < M->algoCount - 1; i++){
-        if(i == 1)
+    for(i = 0; i < final_maze; i++){
+        if(i == 1) // don't want dead end filler showing
             continue;
         for(j = 0; j < M->size; j++)
             for(k = 0; k < M->size; k++)
-                M->algo[M->algoCount - 1].maze[j][k] +=  M->algo[i].maze[j][k]; // adding all layers up for the final solution
+                M->algo[final_maze].maze[j][k] +=  M->algo[i].maze[j][k]; // adding all layers up for the final solution
     }
         
-    makeSVG("solved.svg", M->size, M->algo[M->algoCount - 1].maze, M->algo[3].maze); // make an SVG of the solution
-    makeBMP(M->size, M->algo[M->algoCount - 1].maze, M->algo[3].maze); // also make a BMP
+    makeSVG("solved.svg", M->size, M->algo[final_maze].maze, M->algo[breath_first].maze); // make an SVG of the solution
+    makeBMP(M->size, M->algo[final_maze].maze, M->algo[breath_first].maze); // also make a BMP
 
     /*
     for(i = 0; i < M->algoCount; i++){
