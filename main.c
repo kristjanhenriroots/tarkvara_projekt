@@ -23,6 +23,7 @@ typedef struct dataArr{
 
 // lets make the code more readable
 enum algoArr{generated, deadend, recursive, breath_first, final_maze}; // the same order the mazes are in the struct array
+enum bitmap_mode{regular, secret};
 
 void Ellermaze(int size, short **maze); // maze generation
 void treemaze(int size, short **maze, short algo, short algoloop);
@@ -30,8 +31,8 @@ void findExits(int size, short **maze, short exits[4]); // finding the entrance 
 double deadEnd(int size, short **maze, short exits[4]); // using the dead end filler algorithm
 double recursion(int size, short **raw, short **sol, short exits[4]); // recursive backtracker
 double bfs(int size, short **raw, short **sol, short exits[4]);
-void makeSVG(char *filename, int size, short **maze, short **shortest); // making the SVG file
-int makeBMP(int height, short **maze, short **shortest); // experimental, BMP file creation
+void makeSVG(char *filename, int size, short **maze); // making the SVG file
+int makeBMP(int height, short **maze, int mode, int solved); // experimental, BMP file creation
 
 
 int sizeCheck(int size){
@@ -161,7 +162,7 @@ void printMain(){ // Commands
         "H: Help\n"
         "X: Exit\n");
         // 5: free memory (for now)
-        // secret: secret menu :o
+        // ~: secret menu :o
 }
 
 double generateMenu(maze_t *M){ // user wanted to generate a maze
@@ -255,8 +256,8 @@ int solveMenu(maze_t *M){ // user wants to solve a maze
                 M->algo[final_maze].maze[j][k] +=  M->algo[i].maze[j][k]; // adding all layers up for the final solution
     }
         
-    makeSVG("solved.svg", M->size, M->algo[final_maze].maze, M->algo[breath_first].maze); // make an SVG of the solution
-    makeBMP(M->size, M->algo[final_maze].maze, M->algo[breath_first].maze); // also make a BMP
+    //makeSVG("solved.svg", M->size, M->algo[final_maze].maze); // make an SVG of the solution
+    makeBMP(M->size, M->algo[final_maze].maze, regular, 1); // also make a BMP
 
     /*
     for(i = 0; i < M->algoCount; i++){
@@ -313,6 +314,13 @@ int main(void){
                 break;
             case '5': // free memory
                 freeMemory(&M);
+                break;
+            case '~': // secret menu
+                if(M.size == 0){
+                    printf("Generate something first ;)\n");
+                    break;
+                }
+                makeBMP(M.size, M.algo[final_maze].maze, secret, solved);
                 break;
         }
     }
