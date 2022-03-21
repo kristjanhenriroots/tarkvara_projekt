@@ -115,10 +115,10 @@ int solve(int size, short **raw, short **sol, short exits[4]){
         if(r == exits[3] && c == exits[2]){ // check if reached the exit
             printf("starting pathfinding\n");
             findPath(size, sol, adjacent, previous, exits); // find the shortest way back
-            //free(rowqueue);
-            //free(rowqueue->array); // free the queues
-            //free(colqueue);
-            //free(colqueue->array);
+            free(rowqueue->array); // free the queues
+            free(rowqueue);
+            free(colqueue->array);
+            free(colqueue);
             return 0;
         }
         for(i = 0; i < 4; i++){ // try every move
