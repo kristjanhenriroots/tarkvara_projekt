@@ -2,18 +2,25 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include <windows.h>
 
 #define MAX 700
 #define MIN 30
+#define COLORCOUNT 14 // currently supported colors
 
-struct rgb_data {
-    float r, g, b;
-};
+typedef struct rgb_data {
+    short r, g, b;
+}rgb_t;
 
 typedef struct needed_colors{
-    char rgb[3];
-}colors_t;
+    double rgb[3];
+}selected_t;
+
+typedef struct color_fade{
+    int size;
+    int direction;
+    double fade[3];
+}fade_t;
+
 
 // bitmap file header (14 bytes)
 struct bitmap_file_header{
@@ -39,107 +46,98 @@ struct bitmap_image_header{
     unsigned int    clr_important;      // 4 bytes
 }bih;
 
-enum color_type{wall, path, recursive, breath_first, crossover};
-enum colors{whiteID, silverID, grayID, blackID, purpleID, magentaID, blueID, limeID, greenID, cyanID, tealID, redID, yellowID, maroonID};
+enum color_type{wall, path, recursive, breath_first, crossover}; // element type
+// note, always move fade last!!
+enum colors{white, silver, gray, black, purple, magenta, blue, lime, green, cyan, teal, red, yellow, maroon, fade_cl = 99};
 enum mode_select{regular, secret};
-
-void set_color(char *to, char from[3], int current){
+enum fade_direction{none, horizontal, vertical};
+void set_color(double *to, short from[3]){
     for(int i = 0; i < 3; i++){
         to[i] = from[i];
     }
 }
 
-void get_colors(char *input, int mode, int type){
-    char options[5][30] = { {"walls"}, {"paths"}, {"recursive solution"}, {"shortest solution"}, {"algo crossover"} };
+void fade_calculate(short *to, short *from, fade_t *fade_arr, int element){
+    for(int i = 0; i < 3; i++){
+        fade_arr[element].fade[i] = abs(((double)(to[i]) - (double)(from[i]))) / (double)(fade_arr[0].size); // calculating the change in color per row
+        if(to[i] < from[i])
+            fade_arr[element].fade[i] *= -1;
+    }
+    int user = none;
+    while(user != horizontal && user != vertical){
+        printf(" 1. Horizontal fade\n");
+        printf(" 2. Vertical fade\n");
+        scanf("%d", &user);
+        if(user < 1 || user > 2)
+            printf("Invalid input\n");
+    }
+    fade_arr[element].direction = user;
+}
+
+void get_colors(double *input, int mode, int type, fade_t *fade_arr){
+    static char options[5][30] = { {"walls"}, {"paths"}, {"recursive solution"}, {"shortest solution"}, {"algo crossover"} };
     // color library, note RGB values are backwards
-    char white[]    = {255, 255, 255};
-    char silver[]   = {192, 192, 192};
-    char gray[]     = {128, 128, 128};
-    char black[]    = {0, 0, 0};
-    char purple[]   = {128, 0, 128};
-    char magenta[]  = {255, 0, 255};
-    char blue[]     = {255, 0, 0};
-    char lime[]     = {0, 255, 0};
-    char green[]    = {0, 128, 0};
-    char cyan[]     = {255, 255, 0};
-    char teal[]     = {128, 128, 0};
-    char red[]      = {0, 0, 255};
-    char yellow[]   = {0, 255, 255};
-    char maroon[]   = {0, 0, 128};
+    static short colors[COLORCOUNT][3] = {
+        {255, 255, 255},    // white   
+        {192, 192, 192},    // silver  
+        {128, 128, 128},    // gray    
+        {0, 0, 0},          // black   
+        {128, 0, 128},      // purple  
+        {255, 0, 255},      // magenta 
+        {255, 0, 0},        // blue    
+        {0, 255, 0},        // lime    
+        {0, 128, 0},        // green   
+        {255, 255, 0},      // cyan    
+        {128, 128, 0},      // teal    
+        {0, 0, 255},        // red     
+        {0, 255, 255},      // yellow  
+        {0, 0, 128}         // maroon  
+    };
 
 
     if(mode == regular){
         switch(type){
             case wall:
-                set_color(input, black, wall);
+                set_color(input, colors[black]);
                 break;
             case path:
-                set_color(input, white, path);
+                set_color(input, colors[white]);
                 break;
             case recursive:
-                set_color(input, red, recursive);
+                set_color(input, colors[red]);
                 break;
             case breath_first:
-                set_color(input, blue, breath_first);
+                set_color(input, colors[blue]);
                 break;
             case crossover:
-                set_color(input, purple, crossover);
+                set_color(input, colors[purple]);
                 break;
         }
     }
     else if(mode == secret){
-        int user;
+        int user = -1;
         printf("What color should the %s be?\n", options[type]);
         scanf("%d", &user);
-        while(user < whiteID || user > maroonID){
+        while((user != fade_cl && user > maroon) || user < white){
             printf("Invalid input, try again\n");
             printf("What color should the %s be?\n", options[type]);
             scanf("%d", &user);
         }
-        switch(user){
-            case whiteID:
-                set_color(input, white, type);
-                break;
-            case silverID:
-                set_color(input, silver, type);
-                break;
-            case grayID:
-                set_color(input, gray, type);
-                break;
-            case blackID:
-                set_color(input, black, type);
-                break;
-            case purpleID:
-                set_color(input, purple, type);
-                break;
-            case magentaID:
-                set_color(input, magenta, type);
-                break;
-            case blueID:
-                set_color(input, blue, type);
-                break;
-            case limeID:
-                set_color(input, lime, type);
-                break;
-            case greenID:
-                set_color(input, green, type);
-                break;
-            case cyanID:
-                set_color(input, cyan, type);
-                break;
-            case tealID:
-                set_color(input, teal, type);
-                break;
-            case redID:
-                set_color(input, red, type);
-                break;
-            case yellowID:
-                set_color(input, yellow, type);
-                break;
-            case maroonID:
-                set_color(input, maroon, type);
-                break;
+        if(user == fade_cl){
+            int starting = -1, ending = -1;
+            while(starting < white || ending < white || starting > maroon || ending > maroon){
+                printf("Select starting color: ");
+                scanf("%d", &starting);
+                printf("Select ending color: ");
+                scanf("%d", &ending);
+            }
+            fade_calculate(colors[ending], colors[starting], fade_arr, type);
+            set_color(input, colors[starting]);
         }
+        else{
+            fade_arr[type].direction = none;
+            set_color(input, colors[user]);
+        }    
     }
 }
 
@@ -185,25 +183,43 @@ int makeBMP(int height, short **maze, int mode, int present_elements){
     fwrite(&bih, 1, sizeof(bih), f); // kirjutan headeri
 
     int idx = 0, idy = 0;
-    colors_t elements[5];
-    
+    selected_t elements[5];
+    fade_t colorfade[5];
+    colorfade[0].size = (float)height;
+
     if(mode == secret){ // lets print the color cheatsheet
         printf("!!!Color cheatsheet!!!\n");
-        printf("0: White    |   7: Lime\n");
-        printf("1: Silver   |   8: Green\n");
-        printf("2: Gray     |   9: Cyan\n");
-        printf("3: Black    |  10: Teal\n");
-        printf("4: Purple   |  11: Red\n");
-        printf("5: Magenta  |  12: Yellow\n");
-        printf("6: Blue     |  13: Maroon\n");
+        printf(" 0: White    |   7: Lime\n");
+        printf(" 1: Silver   |   8: Green\n");
+        printf(" 2: Gray     |   9: Cyan\n");
+        printf(" 3: Black    |  10: Teal\n");
+        printf(" 4: Purple   |  11: Red\n");
+        printf(" 5: Magenta  |  12: Yellow\n");
+        printf(" 6: Blue     |  13: Maroon\n");
+        printf("99: Fade :o\n");
     }   
     for(int i = 0; i < present_elements; i++){
-        get_colors(elements[i].rgb, mode, i);
+        get_colors(elements[i].rgb, mode, i, colorfade);
     }
 
     char *bitmap = (char *) malloc(bih.image_size * sizeof(char));
-    for (int i = 0; i < image_size; i++) bitmap[i] = 255;
+    int x_fade_count = 0;
+    int y_fade_count = 0;
+
+    for(int i = 0; i < image_size; i++) bitmap[i] = 255;
+
+    if(mode == secret){
+        for(int i = 0; i < 5; i++){
+            if(colorfade[i].direction == horizontal)
+                x_fade_count++;
+            else if(colorfade[i].direction == vertical)
+                y_fade_count++;
+        }
+           
+    }
+    
     // For each pixel in the RGB image...
+    int i, j;
     for (int row = 0; row < height; row++) {
         if(row / upscale_factor == 0)
             idy = 0;
@@ -219,19 +235,38 @@ int makeBMP(int height, short **maze, int mode, int present_elements){
             for (int color = 0; color < 3; color++) {
                 int index = row * padded_width + col * 3 + color;
                 if(maze[original - 1 - idy][idx] == crossover)
-                    bitmap[index] = elements[crossover].rgb[color];
+                    bitmap[index] = round(elements[crossover].rgb[color]);
                 else if(maze[original - 1 - idy][idx] == breath_first)
-                    bitmap[index] = elements[breath_first].rgb[color];
+                    bitmap[index] = round(elements[breath_first].rgb[color]);
                 else if(maze[original - 1 - idy][idx] == wall)
-                    bitmap[index] = elements[wall].rgb[color];
+                    bitmap[index] = round(elements[wall].rgb[color]);
                 else if(maze[original - 1 - idy][idx] == path)
-                    bitmap[index] = elements[path].rgb[color];
+                    bitmap[index] = round(elements[path].rgb[color]);
                 else if(maze[original - 1 - idy][idx] == recursive)
-                    bitmap[index] = elements[recursive].rgb[color];
+                    bitmap[index] = round(elements[recursive].rgb[color]);
+                //printf("%d ", bitmap[index]);
             }
-            
+            //printf("\n");
+            if(x_fade_count > 0){
+                for(i = 0; i < 5; i++)
+                    if(colorfade[i].direction == horizontal)
+                        for(j = 0; j < 3; j++)
+                            elements[i].rgb[j] += colorfade[i].fade[j];
+            }
+            //printf("new value %.2f %.2f %.2f\n", elements[path].rgb[0], elements[path].rgb[1], elements[path].rgb[2]);
         }
-        
+        if(x_fade_count > 0){
+            for(i = 0; i < 5; i++)
+                if(colorfade[i].direction == horizontal)
+                    for(j = 0; j < 3; j++)
+                        elements[i].rgb[j] -= colorfade[i].fade[j] * width;
+        }
+        if(y_fade_count > 0){
+            for(i = 0; i < 5; i++)
+                if(colorfade[i].direction == vertical)
+                    for(j = 0; j < 3; j++)
+                        elements[i].rgb[j] += colorfade[i].fade[j];
+        }
     }
     fwrite(bitmap, bih.image_size * sizeof(char), 1, f);
     fclose(f);

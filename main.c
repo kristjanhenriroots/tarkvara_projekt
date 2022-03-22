@@ -3,8 +3,6 @@
 #include <string.h>
 #include <time.h>
 
-// to do: remove svg file creation from maze generation, use the same svg function at the end of the program
-
 #define NAMELEN 30
 #define MAZEMIN 5
 #define MAZEMAX 100000
@@ -23,7 +21,7 @@ typedef struct dataArr{
 
 // lets make the code more readable
 enum algoArr{generated, deadend, recursive, breath_first, final_maze}; // the same order the mazes are in the struct array
-enum bitmap_mode{regular, secret};
+enum bitmap_mode{regular, secret}; // for BMP file creation color menu
 
 void Ellermaze(int size, short **maze); // maze generation
 void treemaze(int size, short **maze, short algo, short algoloop);
