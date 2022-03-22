@@ -2,37 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-
-#define NAMELEN 30
-#define MAZEMIN 5
-#define MAZEMAX 100000
-#define BILLION  1000000000.0 // for keeping time on generation algorithms
-
-typedef struct data{
-    short **maze; // maze matrix
-}data_t;
-
-typedef struct dataArr{
-    short exits[4]; // mark entrance and exit coordinates
-    int size; // maze size
-    int algoCount; // the number of solving algorithms + 2 for generation and final solution 
-    data_t *algo; // array of maze matrixes
-}maze_t;
+#include "header.h"
 
 // lets make the code more readable
 enum algoArr{generated, deadend, recursive, breath_first, final_maze}; // the same order the mazes are in the struct array
 enum bitmap_mode{regular, secret}; // for BMP file creation color menu
-
-void Ellermaze(int size, short **maze); // maze generation
-void treemaze(int size, short **maze, short algo, short algoloop);
-void findExits(int size, short **maze, short exits[4]); // finding the entrance and exit
-double deadEnd(int size, short **maze, short exits[4]); // using the dead end filler algorithm
-double recursion(int size, short **raw, short **sol, short exits[4]); // recursive backtracker
-double bfs(int size, short **raw, short **sol, short exits[4]);
-void makeSVG(char *filename, int size, short **maze); // making the SVG file
-int readSVG(char *filename, maze_t *M);
-int makeBMP(int height, short **maze, int mode, int present_elements); // experimental, BMP file creation
-
 
 int sizeCheck(int size){
     if(size < MAZEMIN || size > MAZEMAX || size % 2 == 0){
@@ -313,7 +287,7 @@ int main(void){
                     makeBMP(M.size, M.algo[generated].maze, secret, 2);            
                 break;
             case '9':
-                solved = readSVG("raw.svg", &M);
+                solved = readSVG("solved.svg", &M);
                 printf("\nsize is %d\nsizeof(%lld)\n", M.size, sizeof(M.size));
                 break;
         }

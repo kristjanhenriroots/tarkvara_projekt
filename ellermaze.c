@@ -3,6 +3,8 @@
 #include <string.h>
 #include <time.h>
 #include <math.h>
+#include "header.h"
+
 
 void generateEller(short **cells, short **cellsets, int size) {
 	srand(time(NULL));

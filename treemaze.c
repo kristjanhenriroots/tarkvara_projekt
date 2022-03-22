@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include "header.h"
 
-void addBorders(short **cells, int size);//prototype, function in ellermaze.c
 
 typedef struct {//struct to number each cell
     int P1;

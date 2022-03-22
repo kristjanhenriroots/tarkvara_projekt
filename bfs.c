@@ -2,9 +2,8 @@
 #include <time.h>
 #include <stdlib.h>
 #include <limits.h>
+#include "header.h"
 
-
-#define BILLION  1000000000.0
 // A structure to represent a queue
 struct Queue{
     int front, rear, size;

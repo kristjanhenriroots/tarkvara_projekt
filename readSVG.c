@@ -2,23 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-
-#define ROWMAX 100
-#define COLCOUNT 10
-
-typedef struct data{
-    short **maze; // maze matrix
-}data_t;
-
-typedef struct dataArr{
-    short exits[4]; // mark entrance and exit coordinates
-    int size; // maze size
-    int algoCount; // the number of solving algorithms + 2 for generation and final solution 
-    data_t *algo; // array of maze matrixes
-}maze_t;
-
-void feedMemory(maze_t *M);
-void freeMemory(maze_t *M);
+#include "header.h"
 
 int breakIt(char *format[COLCOUNT], char *row){
     //printf("breaking it\n");
@@ -96,7 +80,7 @@ int readSVG(char *filename, maze_t *M){
     if(solved == 1){
         printf("Warning, maze is already solved\n");
     }
-    printf("SVG file successfully read\n");
+    printf("SVG file successfully read, maze size %d\n", M->size);
     fclose(svg);
     return solved;
 }
