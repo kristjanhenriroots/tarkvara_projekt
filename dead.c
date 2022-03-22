@@ -70,6 +70,6 @@ double deadEnd(int size, short **maze, short exits[4]){
     }
     clock_gettime(CLOCK_REALTIME, &end); // stop timer
     // time_spent = end - start
-    double time_spent = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / BILLION * 1000;
+    double time_spent = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / BILLION;
     return time_spent;
 }

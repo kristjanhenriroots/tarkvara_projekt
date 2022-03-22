@@ -113,7 +113,6 @@ int solve(int size, short **raw, short **sol, short exits[4]){
         c = dequeue(colqueue);
         nr++;
         if(r == exits[3] && c == exits[2]){ // check if reached the exit
-            printf("starting pathfinding\n");
             findPath(size, sol, adjacent, previous, exits); // find the shortest way back
             free(rowqueue->array); // free the queues
             free(rowqueue);
@@ -147,10 +146,10 @@ int solve(int size, short **raw, short **sol, short exits[4]){
         }
     }
    
-    //free(rowqueue);
-    //free(rowqueue->array); // //free the queues
-    //free(colqueue);
-    //free(colqueue->array);
+    free(rowqueue->array); // free the queues
+    free(rowqueue);
+    free(colqueue->array);
+    free(colqueue);
     return -1;
 }
 
@@ -165,6 +164,6 @@ double bfs(int size, short **raw, short **sol, short exits[4]){
     }
     clock_gettime(CLOCK_REALTIME, &end); // stop timer
     // time_spent = end - start
-    double time_spent = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / BILLION * 1000;
+    double time_spent = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / BILLION;
     return time_spent;
 }
