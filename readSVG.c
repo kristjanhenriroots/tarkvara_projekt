@@ -79,6 +79,7 @@ int readSVG(char *filename, maze_t *M){
     }
     if(solved == 1){
         printf("Warning, maze is already solved\n");
+        M->algo[M->size - 1].maze = M->algo[0].maze; // if its solved it'll be added to appropriate place in the array
     }
     printf("SVG file successfully read, maze size %d\n", M->size);
     fclose(svg);
