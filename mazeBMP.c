@@ -259,7 +259,7 @@ int makeBMP(int height, short **maze, int mode, int present_elements){ // making
             for(i = 0; i < 5; i++)
                 if(colorfade[i].direction == horizontal)
                     for(j = 0; j < 3; j++)
-                        elements[i].rgb[j] -= colorfade[i].fade[j] * width; // reset the RGB values
+                        elements[i].rgb[j] -= colorfade[i].fade[j] * (width - 1); // reset the RGB values
         }
         if(y_fade_count > 0){ // if a vertical color fade is present
             for(i = 0; i < 5; i++)

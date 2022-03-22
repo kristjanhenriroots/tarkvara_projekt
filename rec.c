@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
+#include "header.h"
 
-#define BILLION  1000000000.0
+
 int moves;
 // https://www.codesdope.com/blog/article/backtracking-to-solve-a-rat-in-a-maze-c-java-pytho/
 int solvemaze(int y, int x, int endy, int endx, int size, short **maze, short **solution, short **helper){

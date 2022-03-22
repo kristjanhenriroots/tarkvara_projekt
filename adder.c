@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "header.h"
+
 
 void makeSVG(char *filename, int size, short **maze, short **shortest){
     FILE *svg;
