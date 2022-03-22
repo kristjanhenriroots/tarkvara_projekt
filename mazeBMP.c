@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <windows.h>
 
 #define MAX 700
 #define MIN 30
@@ -147,7 +148,7 @@ int round4(int x) {
     return x % 4 == 0 ? x : x - x % 4 + 4;
 }
 
-int makeBMP(int height, short **maze, int mode){
+int makeBMP(int height, short **maze, int mode, int present_elements){
     int original = height;
     int width;
     int dpi = 1000;
@@ -196,8 +197,7 @@ int makeBMP(int height, short **maze, int mode){
         printf("5: Magenta  |  12: Yellow\n");
         printf("6: Blue     |  13: Maroon\n");
     }   
-
-    for(int i = 0; i < 5; i++){
+    for(int i = 0; i < present_elements; i++){
         get_colors(elements[i].rgb, mode, i);
     }
 
@@ -240,3 +240,4 @@ int makeBMP(int height, short **maze, int mode){
     return 0;
 
 }
+

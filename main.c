@@ -32,7 +32,7 @@ double deadEnd(int size, short **maze, short exits[4]); // using the dead end fi
 double recursion(int size, short **raw, short **sol, short exits[4]); // recursive backtracker
 double bfs(int size, short **raw, short **sol, short exits[4]);
 void makeSVG(char *filename, int size, short **maze); // making the SVG file
-int makeBMP(int height, short **maze, int mode, int solved); // experimental, BMP file creation
+int makeBMP(int height, short **maze, int mode, int present_elements); // experimental, BMP file creation
 
 
 int sizeCheck(int size){
@@ -271,7 +271,7 @@ int solveMenu(maze_t *M){ // user wants to solve a maze
     }
         
     //makeSVG("solved.svg", M->size, M->algo[final_maze].maze); // make an SVG of the solution
-    makeBMP(M->size, M->algo[final_maze].maze, regular, 1); // also make a BMP
+    makeBMP(M->size, M->algo[final_maze].maze, regular, 5); // also make a BMP
 
     /*
     for(i = 0; i < M->algoCount; i++){
@@ -336,9 +336,9 @@ int main(void){
                 }
 
                 if(solved == 1)
-                    makeBMP(M.size, M.algo[final_maze].maze, secret, solved);
+                    makeBMP(M.size, M.algo[final_maze].maze, secret, 5);
                 else
-                    makeBMP(M.size, M.algo[generated].maze, secret, solved);            
+                    makeBMP(M.size, M.algo[generated].maze, secret, 2);            
                 break;
         }
     }
