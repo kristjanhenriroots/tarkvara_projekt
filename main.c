@@ -7,6 +7,8 @@
 
 // lets make the code more readable
 
+
+
 int sizeCheck(int size){
     if(size < MAZEMIN || size > MAZEMAX || size % 2 == 0){
         printf("Not allowed size!\n");
@@ -106,6 +108,7 @@ int generateMenu(maze_t *M){ // user wanted to generate a maze
     double time_spent = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / BILLION; // calculate time spent in milliseconds
     
     printf("Generation time %.4f ms\n", time_spent * 1000);    
+    makeBMP(getFilename(write, bmp_file, automatic, generated), regular, generated, M); // also make a BMP
 
     return 0; 
 }
@@ -141,9 +144,7 @@ int solveMenu(maze_t *M){ // user wants to solve a maze
     }
         
     //makeSVG("solved.svg", M->size, M->algo[final_maze].maze); // make an SVG of the solution
-    printf("starting BMP creation\n");
-    //makeBMP(getFilename(write, bmp_file, automatic, generated), regular, generated, M); // also make a BMP
-    //makeBMP(getFilename(write, bmp_file, automatic, final_maze), regular, final_maze, M); // also make a BMP
+    makeBMP(getFilename(write, bmp_file, automatic, final_maze), regular, final_maze, M); // also make a BMP
 
     /*
     for(i = 0; i < M->algoCount; i++){
@@ -161,12 +162,11 @@ int solveMenu(maze_t *M){ // user wants to solve a maze
 }
 
 int main(void){
-    int inloop = 1, solved = 0, filetype;
+    int inloop = 1, solved = 0, usr_filetype;
     maze_t M;
 	//getSize(&M);
     M.algoCount = 5; // current nr
-    M.size = 21;
-    feedMemory(&M);
+    M.size = 0;
     printMain(); // print the commands
     while(inloop){
         char input;
@@ -185,37 +185,39 @@ int main(void){
                     printf("Already solved!\n");
                 }
                 break;
-            case '3': // read from file
+            /*case '3': // read from file
                 printf(" 1. TXT file\n 2. SVG file\n");
                 scanf("%d", &filetype);
                 if(filetype != 1 && filetype != 2){
                     printf("Invalid input\n");
                     break;
                 }
-                manageFiles(read, filetype - 1, regular, manual, &M);
+                //manageFiles(read, filetype - 1, regular, manual, &M);
                 solved = 0;
-                break;
-            case '4': { // save to file
-                printf(" 1. TXT file\n 2. SVG file\n 3. BMP file\n");
-                scanf("%d", &filetype);
-                if(filetype != 1 && filetype != 2 && filetype != 3){
+                break;*/
+                
+            case '4': // save to file
+                
+                //printf(" 1. TXT file\n 2. SVG file\n 3. BMP file\n");
+                //scanf("%d", &filetype);
+                //if(filetype != 1 && filetype != 2 && filetype != 3){
                     printf("Invalid input\n");
-                    break;
-                }
+                    //break;
+                //}
                 if(solved > 0){
                     int times;
-                    enum xsave{save_raw = 1, save_sol = 2, save_both = 3};
+                    //enum xsave{save_raw = 1, save_sol = 2, save_both = 3};
                     printf("Would you like to save the raw file(1), the solution(2) or both(3)?\n");
                     scanf("%d", &times);
-                    if(times != save_raw && times != save_sol && times != save_both)
+                    //if(times != save_raw && times != save_sol && times != save_both)
                         printf("Invalid input\n");
                     break;
-                    switch(times){
+                    /*switch(times){
                         case save_raw:
-                            manageFiles(write, filetype, ask_user, generated, &M);
+                            //manageFiles(write, filetype, ask_user, generated, &M);
                             break;
                         case save_sol:
-                            manageFiles(write, filetype, ask_user, final_maze, &M);
+                            //manageFiles(write, filetype, ask_user, final_maze, &M);
                             break;
                         case save_both:
                             printf("Generated:\n");
@@ -223,12 +225,12 @@ int main(void){
                             printf("Solved:\n");
                             manageFiles(write, filetype, ask_user, final_maze, &M);
                             break;
-                    }
+                    }*/
                 }
                 else
-                    manageFiles(write, filetype, ask_user, generated, &M);
+                    //manageFiles(write, usr_filetype, ask_user, generated, &M);
                 break;
-            }
+            
             case 'H': // print commands again
                 printMain();
                 break;
@@ -236,10 +238,7 @@ int main(void){
                 printf("Exiting program\n");
                 inloop = 0;
                 break;
-            case '5': // free memory
-                freeMemory(&M);
-                break;
-            case '~': // secret menu
+            /*case '~': {// secret menu
                 if(M.size == 0){
                     printf("Generate something first ;)\n");
                     break;
@@ -249,7 +248,8 @@ int main(void){
                     makeBMP(getFilename(write, bmp_file, ask_user, final_maze), secret, final_maze, &M);
                 else
                     makeBMP(getFilename(write, bmp_file, ask_user, generated), secret, generated, &M);
-                break;
+                break; 
+            }*/
         }
     }
     if(M.size > 0) // immediately leaving without generating would crash as the memory would be empty

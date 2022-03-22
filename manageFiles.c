@@ -8,10 +8,13 @@ enum maze_type{unsolved_maze, solved_maze};
 FILE *getFilename(int mode, int filetype, int complexity, int mazetype){    // getting the filename
     FILE *f = NULL;
     char default_filenames[2][NAMELEN]  = { {"raw"},  {"solved"} };
-    char default_extensions[3][4]       = { {".txt"}, {".svg"}, {".bmp"} }; // all possible combiantions of default files and user questions
+    char default_extensions[3][5]       = { {".txt"}, {".svg"}, {".bmp"} }; // all possible combiantions of default files and user questions
     char chat_mode[2][MENUOPTION]       = { {"read"}, {"write"} };
     char chat_file[3][MENUOPTION]       = { {"text"}, {"svg"}, {"bitmap"} };
     char chat_grammar[2][MENUOPTION]    = { {"from"}, {"to"} };
+    if(mazetype == final_maze)
+        mazetype = 1;
+    printf("mazetype is %d\n", mazetype);
     if(complexity == ask_user){
         char ans;
         printf("Would you like to select personal filenames? y/n\n");
@@ -26,10 +29,11 @@ FILE *getFilename(int mode, int filetype, int complexity, int mazetype){    // g
         }
     }
     if(complexity == automatic){                                            // using default files like "raw.svg"
+        printf("opening file %s\n",strcat(default_filenames[mazetype], default_extensions[filetype]));
         if(filetype == bmp_file)
-            f = fopen(strcat(default_filenames[mazetype], default_extensions[filetype]), "wb");
+            f = fopen(default_filenames[mazetype], "wb");
         else    
-            f = fopen(strcat(default_filenames[mazetype], default_extensions[filetype]), "r+");
+            f = fopen(default_filenames[mazetype], "r+");
         if(f == NULL){
             printf("Error automaticly opening file\n");                     // not supposed to go wrong
             return f;
@@ -217,8 +221,6 @@ int manageFiles(int mode, int filetype, int complexity, int mazetype, maze_t *M)
         printf("Overwriting previous maze\n");
         freeMemory(M);
     }
-    if(mazetype == final_maze)
-        mazetype = 1;
     int success;
     switch(mode){
         case read:
@@ -247,5 +249,5 @@ int manageFiles(int mode, int filetype, int complexity, int mazetype, maze_t *M)
         
     }
 
-    return 0;
+    return success;
 }

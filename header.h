@@ -57,11 +57,13 @@ double recursion(int size, short **raw, short **sol, short exits[4]);   // recur
 
 double bfs(int size, short **raw, short **sol, short exits[4]);         // breath first search
 
-// managing files
+// managing files 
+
 enum file_complexity{automatic, manual, ask_user};                                //  int complexity in manageFiles
 enum file_mode{read, write};                                            //  int mode in manageFiles
-enum file_type{txt_file, svg_file, bmp_file};                           /*  the int filetype in manageFiles, 
-                                                                            makes for easier function calling */                                                                       
+enum file_type{txt_file, svg_file, bmp_file};                           //  the int filetype in manageFiles, 
+                                                                            //makes for easier function calling                                                                        
+
 int manageFiles(int mode, int filetype, int complexity, int mazetype, maze_t *M);                                
 
 FILE *getFilename(int mode, int filetype, int complexity, int mazetype);
