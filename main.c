@@ -30,6 +30,7 @@ double deadEnd(int size, short **maze, short exits[4]); // using the dead end fi
 double recursion(int size, short **raw, short **sol, short exits[4]); // recursive backtracker
 double bfs(int size, short **raw, short **sol, short exits[4]);
 void makeSVG(char *filename, int size, short **maze); // making the SVG file
+int readSVG(char *filename, maze_t *M);
 int makeBMP(int height, short **maze, int mode, int present_elements); // experimental, BMP file creation
 
 
@@ -310,6 +311,10 @@ int main(void){
                     makeBMP(M.size, M.algo[final_maze].maze, secret, 5);
                 else
                     makeBMP(M.size, M.algo[generated].maze, secret, 2);            
+                break;
+            case '9':
+                solved = readSVG("raw.svg", &M);
+                printf("\nsize is %d\nsizeof(%lld)\n", M.size, sizeof(M.size));
                 break;
         }
     }
