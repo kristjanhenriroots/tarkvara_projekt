@@ -2,11 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-
-#define MAX 700
-#define MIN 30
-#define COLORCOUNT 14 // currently supported colors
-#define TARGETSIZE 3000 // target width in pixels
+#include "header.h"
 
 typedef struct needed_colors{ // holds the colors of all the maze elements
     double rgb[3];
@@ -43,13 +39,11 @@ struct bitmap_image_header{
     unsigned int    clr_important;      // 4 bytes
 }bih;
 
-enum color_type{wall, path, recursive, breath_first, crossover}; // element type
 // note, always move fade last!!
 enum colors{white, silver, gray, black, purple, magenta, blue, lime, green, cyan, teal, red, yellow, maroon, fade_cl = 99}; // all colors
-enum mode_select{regular, secret}; // mode the function was called in
 enum fade_direction{none, horizontal, vertical}; // fade direction
 
-void set_color(double *to, short from[3]){ // setting the actual RGB color to an element
+void set_color(double *to, short from[3]){       // setting the actual RGB color to an element
     for(int i = 0; i < 3; i++){
         to[i] = from[i];
     }
@@ -69,7 +63,7 @@ void fade_calculate(short *to, short *from, fade_t *fade_arr, int element){ // c
         if(user < 1 || user > 2)
             printf("Invalid input\n");
     }
-    fade_arr[element].direction = user; // marking down the fade direction
+    fade_arr[element].direction = user;            // marking down the fade direction
 }
 
 void get_colors(double *input, int mode, int type, fade_t *fade_arr){ // set the element colors
@@ -152,11 +146,12 @@ int round4(int x) {
                     if the maze is not solved then only the wall and path colors are needed
 */
 
-int makeBMP(int height, short **maze, int mode, int present_elements){ // making a BMP file from a maze matrix
+int makeBMP(FILE *f, int mode, int mazetype, maze_t *M){ // making a BMP file from a maze matrix
+    int height = M->size;
     int original = height;
     int width;
     int dpi = 1000;
-    int upscale_factor = TARGETSIZE / height; // setting the upscale factor, all mazes will be roughly the same size
+    int upscale_factor = BMPTARGETSIZE / height; // setting the upscale factor, all mazes will be roughly the same size
     height *= upscale_factor;
     width = height;
 
@@ -183,8 +178,6 @@ int makeBMP(int height, short **maze, int mode, int present_elements){ // making
     bih.clr_used        = 0;
     bih.clr_important   = 0;
 
-    FILE *f = fopen("bitmap.bmp", "wb");
-
     fwrite(&bfh, 1, 14, f);
     fwrite(&bih, 1, sizeof(bih), f); // writing the header to the file
 
@@ -203,16 +196,21 @@ int makeBMP(int height, short **maze, int mode, int present_elements){ // making
         printf(" 5: Magenta  |  12: Yellow\n");
         printf(" 6: Blue     |  13: Maroon\n");
         printf("99: Fade :o\n");
-    }   
-    for(int i = 0; i < present_elements; i++){ // if an unsolved maze was given, no colors for solutions will be needed
+    }
+    int present_elements;
+    if(mazetype == final_maze)                  // does the sent maze have a solution path
+        present_elements = 5;                   // yes, there are 5 different elements
+    else
+        present_elements = 2;                   // no, there are 2 different elements (wall and path)
+    for(int i = 0; i < present_elements; i++){  // if an unsolved maze was given, no colors for solutions will be needed
         get_colors(elements[i].rgb, mode, i, colorfade); // set colors for all present elements
     }
 
-    char *bitmap = (char *) malloc(bih.image_size * sizeof(char)); // actual bitmap to be written in the file
+    char *bitmap = (char *) malloc(bih.image_size * sizeof(char));  // actual bitmap to be written in the file
     int x_fade_count = 0; // elements with a color fade in both directions
     int y_fade_count = 0;
 
-    for(int i = 0; i < image_size; i++) bitmap[i] = 255; // painting the whole bitmap white
+    for(int i = 0; i < image_size; i++) bitmap[i] = 255; // painting the whole bitmap white, could be unnecessary
 
     if(mode == secret){ // don't need to check when the user didn't choose colors
         for(int i = 0; i < 5; i++){
@@ -237,15 +235,15 @@ int makeBMP(int height, short **maze, int mode, int present_elements){ // making
                 idx = col / upscale_factor;
             for (int color = 0; color < 3; color++){ // add the R, G and B values
                 int index = row * padded_width + col * 3 + color; // find location in the bitmap
-                if(maze[original - 1 - idy][idx] == crossover)
+                if(M->algo[mazetype].maze[original - 1 - idy][idx] == crossover)
                     bitmap[index] = round(elements[crossover].rgb[color]);      // case: crossover
-                else if(maze[original - 1 - idy][idx] == breath_first)
+                else if(M->algo[mazetype].maze[original - 1 - idy][idx] == breath_first)
                     bitmap[index] = round(elements[breath_first].rgb[color]);   // case: bfs algo
-                else if(maze[original - 1 - idy][idx] == wall)
+                else if(M->algo[mazetype].maze[original - 1 - idy][idx] == wall)
                     bitmap[index] = round(elements[wall].rgb[color]);           // case: wall
-                else if(maze[original - 1 - idy][idx] == path)
+                else if(M->algo[mazetype].maze[original - 1 - idy][idx] == path)
                     bitmap[index] = round(elements[path].rgb[color]);           // case: path
-                else if(maze[original - 1 - idy][idx] == recursive)
+                else if(M->algo[mazetype].maze[original - 1 - idy][idx] == recursive)
                     bitmap[index] = round(elements[recursive].rgb[color]);      // case: recursive algo
             }
             if(x_fade_count > 0){ // if a horizontal color fade is present
