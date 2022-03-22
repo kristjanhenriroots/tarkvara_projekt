@@ -334,10 +334,11 @@ int main(void){
                     printf("Generate something first ;)\n");
                     break;
                 }
+
                 if(solved == 1)
                     makeBMP(M.size, M.algo[final_maze].maze, secret, solved);
                 else
-                    makeBMP(M.size, M.algo[generated].maze, secret, solved);
+                    makeBMP(M.size, M.algo[generated].maze, secret, solved);            
                 break;
         }
     }
