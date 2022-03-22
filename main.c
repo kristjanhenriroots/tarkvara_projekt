@@ -73,6 +73,21 @@ void freeMemory(maze_t *M){ // free the memory
     M->size = 0;
 }
 
+int overflow(double nano, double sec){
+    /*
+        It is possible for a buffer overflow to happen when dealing with very
+        precise timings and the generation is taking more than a second. That's
+        why its necessary to check output value before printing, if a buffer overflow
+        happens the result will be negative or just not equal to the inaccurate value after
+        multiplication, in that case second precision is used instead of millisecond precision
+    */
+    printf("%f and %f\n", nano, sec);
+    if(nano * 1000 == sec)
+        return 1;
+    return -1;
+}
+
+
 
 int readFile(maze_t *M){ // reading maze from a file
     if(M->size > 0){ // something is already in memory
@@ -98,10 +113,12 @@ int readFile(maze_t *M){ // reading maze from a file
                 printf("Maze is already solved!\n");
                 return 0;
             }
+            /*
             if(i != 0 && i != 1){ // thats not our maze file!
                 printf("Incorrect file!!\n");
                 return 0;
-            }  
+            } 
+            */ 
         }
     }
     printf("Maze read from %s\n", filename);
@@ -165,7 +182,7 @@ void printMain(){ // Commands
         // ~: secret menu :o
 }
 
-double generateMenu(maze_t *M){ // user wanted to generate a maze
+int generateMenu(maze_t *M){ // user wanted to generate a maze
     struct timespec start, end; // keep accurate time
     enum genalgo{null, eller, tree, prim};
     if(M->size > 0){ // something is already generated
@@ -206,24 +223,18 @@ double generateMenu(maze_t *M){ // user wanted to generate a maze
     clock_gettime(CLOCK_REALTIME, &end); // stop timer
     printf("Generation successful\n");
     //makeSVG("raw.svg", M->size, M->algo[0].maze, M->algo[3].maze); // make an SVG of the raw maze
-    double time_spent = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / BILLION * 1000; // calculate time spent in milliseconds
-    if(time_spent > 0.0){
-        printf("Generation time %.4f ms\n", time_spent);
+    
+    double time_spent_nano = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / BILLION * 1000; // calculate time spent in milliseconds
+    double time_spent_sec = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / BILLION;
+    if(overflow(time_spent_nano, time_spent_sec) == 1){
+        printf("Generation time %.4f ms\n", time_spent_nano);
     }
-    /*
-        It is possible for a buffer overflow to happen when dealing with very
-        precise timings and the generation is taking more than a second. That's
-        why its necessary to check output value before printing, if a buffer overflow
-        happens the result will be negative and will be calculated again using
-        second precision instead of millisecond precision
-    */
+    
     else{
-        time_spent = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / BILLION;
-        printf("Generation time %.4f s\n", time_spent);
+        printf("Generation time %.4f s\n", time_spent_sec);
 
-    } 
-
-    return time_spent;
+    }
+    return 0; 
 }
 
 int solveMenu(maze_t *M){ // user wants to solve a maze
@@ -240,11 +251,14 @@ int solveMenu(maze_t *M){ // user wants to solve a maze
     }
     findExits(M->size, M->algo[generated].maze, M->exits); // does it have an exit?
     tdead = deadEnd(M->size, M->algo[deadend].maze, M->exits);
-    printf("Dead end solution %.4fms\n", tdead);
+    printf("Dead end solution %.4f ms\n", tdead);
 
     trec = recursion(M->size, M->algo[generated].maze, M->algo[recursive].maze, M->exits); // measuring time and solving
-    printf("Recursive backtracker %.4fms\n", trec);
-
+    double trec_buf = trec * 1000;
+    if(overflow(trec, trec_buf) == 1)
+        printf("Recursive backtracker %.4f ms\n", trec);
+    else
+        printf("Recursive backtracker %.4f s\n", trec_buf);
     tbfs = bfs(M->size, M->algo[generated].maze, M->algo[breath_first].maze, M->exits); // measuring time and solving
     printf("Breath first search %.4f ms\n", tbfs);
 
@@ -320,10 +334,11 @@ int main(void){
                     printf("Generate something first ;)\n");
                     break;
                 }
-                if(solved == 0)
-                    makeBMP(M.size, M.algo[generated].maze, secret, solved);
-                else
+
+                if(solved == 1)
                     makeBMP(M.size, M.algo[final_maze].maze, secret, solved);
+                else
+                    makeBMP(M.size, M.algo[generated].maze, secret, solved);            
                 break;
         }
     }

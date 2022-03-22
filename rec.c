@@ -51,7 +51,8 @@ double recursion(int size, short **raw, short **sol, short exits[4]){
         free(helper[i]);
     clock_gettime(CLOCK_REALTIME, &end); // stop timer
     // time_spent = end - start
-    double time_spent = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / BILLION * 1000;
+    double time_spent = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / BILLION;
+
     printf("Rec solution lenght %d squares\n", moves + 1);
     return time_spent;
 }
