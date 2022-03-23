@@ -246,7 +246,7 @@ int main(void){
                 if(usr_filetype == 2)
                     makeBMP(getFilename(write, bmp_file, ask_user, final_maze), secret, final_maze, &M);
                 else
-                    makeBMP(getFilename(write, bmp_file, ask_user, final_maze), secret, generated, &M);
+                    makeBMP(getFilename(write, bmp_file, ask_user, generated), secret, generated, &M);
                 break; 
             }
         }

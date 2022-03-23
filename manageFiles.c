@@ -50,7 +50,7 @@ FILE *getFilename(int mode, int filetype, int complexity, int mazetype){    // g
             f = fopen(strcat(default_filenames[mazetype], default_extensions[filetype]), "r+");
         if(f == NULL){
             printf("Error automatically opening file\n");                     // not supposed to go wrong
-            return f;
+            return NULL;
         }
         return f;
     }

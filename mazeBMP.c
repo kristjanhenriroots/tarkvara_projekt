@@ -4,6 +4,8 @@
 #include <math.h>
 #include "header.h"
 
+// idea, insanity mode, completely random color every column?
+
 typedef struct needed_colors{ // holds the colors of all the maze elements
     double rgb[3];
 }selected_t;
@@ -12,6 +14,7 @@ typedef struct color_fade{ // color fade values
     int size; // keeping maze size here
     int direction; // horizontal or vertical
     double fade[3]; // individual RGB change values per row / column
+    double original[3];
 }fade_t;
 
 
@@ -40,7 +43,8 @@ struct bitmap_image_header{
 }bih;
 
 // note, always move fade last!!
-enum colors{white, silver, gray, black, purple, magenta, blue, lime, green, cyan, teal, red, yellow, maroon, fade_cl = 99}; // all colors
+enum colors{white, silver, gray, black, purple, magenta, blue, lime, green, cyan, teal, red, yellow, maroon, 
+            random_list = 66, random_overall = 77, fade_cl = 99}; // all colors
 enum fade_direction{none, horizontal, vertical}; // fade direction
 
 void set_color(double *to, short from[3]){       // setting the actual RGB color to an element
@@ -54,6 +58,7 @@ void fade_calculate(short *to, short *from, fade_t *fade_arr, int element){ // c
         fade_arr[element].fade[i] = abs(((double)(to[i]) - (double)(from[i]))) / (double)(fade_arr[0].size); // calculating the change in color per row
         if(to[i] < from[i])
             fade_arr[element].fade[i] *= -1; // if a value needs to decrease it needs to change it to negative
+        fade_arr[element].original[i] = fade_arr[element].fade[i];
     }
     int user = none;
     while(user != horizontal && user != vertical){ // asking user for fade direction
@@ -64,6 +69,17 @@ void fade_calculate(short *to, short *from, fade_t *fade_arr, int element){ // c
             printf("Invalid input\n");
     }
     fade_arr[element].direction = user;            // marking down the fade direction
+}
+
+short randomNr(int max, int count, short RGB[3]){ // if the user wants a random nr
+    srand(time(NULL));
+    if(count < 3){
+        return rand() % max;
+    }
+    for(int i = 0; i < count; i++){
+        RGB[i] = rand() % max; // don't need the minimum, it will always be 0
+    }
+    return 0;
 }
 
 void get_colors(double *input, int mode, int type, fade_t *fade_arr){ // set the element colors
@@ -86,7 +102,7 @@ void get_colors(double *input, int mode, int type, fade_t *fade_arr){ // set the
         {0, 255, 255},      // yellow  
         {0, 0, 128}         // maroon  
     };
-
+    
     if(mode == regular){ // preset colors, no input needed
         switch(type){
             case wall: // giving every element its color
@@ -108,28 +124,55 @@ void get_colors(double *input, int mode, int type, fade_t *fade_arr){ // set the
     }
     else if(mode == secret){ // user input needed on color
         int user = -1;
+        int fade_inputs[2];
+        short gen_fade[2][3]; // placeholder for random colors
+        enum fadeInput{start_color, end_color};     // indexes for user fade input gen_fade
         printf("What color should the %s be?\n", options[type]); // asking for every element
         scanf("%d", &user);
-        while((user != fade_cl && user > maroon) || user < white){
-            printf("Invalid input, try again\n");
-            printf("What color should the %s be?\n", options[type]);
-            scanf("%d", &user);
-        }
-        if(user == fade_cl){ // user wants a color fade
-            int starting = -1, ending = -1;
-            while(starting < white || ending < white || starting > maroon || ending > maroon){
+        switch(user){
+            case white ... maroon:                  // just a color from the list
+                fade_arr[type].direction = none;    // mark there is no fade
+                set_color(input, colors[user]);     // set user wanted color for element
+                break;
+            case fade_cl:                           // user selected fade
+                randomNr(255, 3, gen_fade[start_color]);   // precalculating a random color, that way two consecutive randoms won't be equal
                 printf("Select starting color: ");
-                scanf("%d", &starting);
-                printf("Select ending color: ");
-                scanf("%d", &ending);
-            }
-            fade_calculate(colors[starting], colors[ending], fade_arr, type); // calculate fade
-            set_color(input, colors[starting]); // set the starting value to element
+                scanf("%d", &fade_inputs[start_color]);
+                printf("Select ending color: ");    
+                scanf("%d", &fade_inputs[end_color]);   // where to begin and end
+                for(int i = 0; i < 2; i++){
+                    switch(fade_inputs[i]){
+                        case white ... maroon:  // just a color, no further modification needed
+                            for(int j = 0; j < 3; j++)
+                                gen_fade[i][j] = colors[fade_inputs[i]][j]; // can't use set color due to gen_fade being short
+                            break;
+                        case random_list:       // giving the element a random color from the list 0 - 14
+                            fade_inputs[i] = randomNr(COLORCOUNT, 0, NULL); 
+                            break;
+                        case random_overall:    // giving the element a random R, G and B value 0 - 255
+                            if(i > start_color)
+                                randomNr(255, 3, gen_fade[i]);
+                            break;
+                        default:
+                            printf("Invalid input\n");
+                            exit(0);
+                            break;
+                    }
+                }
+                fade_calculate(gen_fade[end_color], gen_fade[start_color], fade_arr, type); // calculate fade
+                set_color(input, gen_fade[start_color]);
+                break;
+            case random_list:       // user just wants a random color from the list
+                set_color(input, colors[randomNr(COLCOUNT, 0, NULL)]);
+                break;
+            case random_overall:    // user wants a completely random color for element
+                randomNr(255, 3, gen_fade[start_color]); // using an array meant for fade colors but it'll do when not in use
+                set_color(input, gen_fade[start_color]);
+                break;
+            default: // user messed something up
+                printf("Invalid input\n");
+                exit(0);
         }
-        else{
-            fade_arr[type].direction = none; // mark there is no fade
-            set_color(input, colors[user]); // set user wanted color for element
-        }    
     }
 }
 
@@ -195,6 +238,9 @@ int makeBMP(FILE *f, int mode, int mazetype, maze_t *M){ // making a BMP file fr
         printf(" 4: Purple   |  11: Red\n");
         printf(" 5: Magenta  |  12: Yellow\n");
         printf(" 6: Blue     |  13: Maroon\n");
+        printf("---------------------------\n");
+        printf("66: Random from list\n");
+        printf("77: Fully random\n");
         printf("99: Fade :o\n");
     }
     int present_elements;
@@ -257,7 +303,7 @@ int makeBMP(FILE *f, int mode, int mazetype, maze_t *M){ // making a BMP file fr
             for(i = 0; i < 5; i++)
                 if(colorfade[i].direction == horizontal)
                     for(j = 0; j < 3; j++)
-                        elements[i].rgb[j] -= colorfade[i].fade[j] * (width - 1); // reset the RGB values
+                        elements[i].rgb[j] = colorfade[i].original[i]; // reset the RGB values
         }
         if(y_fade_count > 0){ // if a vertical color fade is present
             for(i = 0; i < 5; i++)
