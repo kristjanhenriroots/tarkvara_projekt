@@ -1,11 +1,24 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
 // macros
 
-#define ROWMAX      100             // maximum lenght of SVG file row
-#define COLCOUNT    10              // SVG file max columns
-#define NAMELEN     30              // max length for string inputs
-#define MAZEMIN     5               // min size for a maze
-#define MAZEMAX     100000          // max size for a maze
-#define BILLION     1000000000.0    // for keeping time on generation algorithms
+#define ROWMAX          100             // maximum lenght of SVG file row
+#define COLCOUNT        10              // SVG file max columns
+#define NAMELEN         30              // max length for string inputs
+#define MAZEMIN         5               // min size for a maze
+#define MAZEMAX         100000          // max size for a maze
+#define BILLION         1000000000.0    // for keeping time on generation algorithms
+#define MENUOPTION      10              // standard length for menu options
+#define COLORCOUNT      14              // currently supported bitmap colors
+#define BMPTARGETSIZE   3000            // target bitmap width in pixels
+
+enum algoArr{generated, deadend, recursive, breath_first, final_maze};  // the same order the mazes are in the struct array
+enum bitmap_mode{regular, secret};                                      // for BMP file creation color menu
+enum element_type{wall, path, rec_path, bfs_path, crossover};                     // element type, used in BMP and SVG file creation
+
 
 // holding mazes
 
@@ -44,11 +57,22 @@ double recursion(int size, short **raw, short **sol, short exits[4]);   // recur
 
 double bfs(int size, short **raw, short **sol, short exits[4]);         // breath first search
 
-// managing files
+// managing files 
 
-//void makeSVG(char *filename, int size, short **maze);                 // making the SVG file
+enum file_complexity{automatic, manual, ask_user};                          //  int complexity in manageFiles
+enum file_mode{read, write};                                                //  int mode in manageFiles
+enum file_type{txt_file, svg_file, bmp_file};                               //  the int filetype in manageFiles, 
+                                                                            //makes for easier function calling                                                                        
 
-int readSVG(char *filename, maze_t *M);                                 // reading SVG files
+int manageFiles(int mode, int filetype, int complexity, int mazetype, maze_t *M); // central hub for file management                                
 
-int makeBMP(int height, short **maze, int mode, int present_elements);  // experimental, BMP file creation
+FILE *getFilename(int mode, int filetype, int complexity, int mazetype);
+
+int sizeCheck(int size);                                                // to check if maze size is allowed
+
+int writeSVG(FILE *svg, maze_t *M, int mazetype);                       // making the SVG file
+
+int readSVG(FILE *svg, maze_t *M);                                      // reading SVG files
+
+int makeBMP(FILE *f, int mode, int mazetype, maze_t *M);                // experimental, BMP file creation
 

@@ -59,9 +59,10 @@ int readSVG(char *filename, maze_t *M){
     enum color_values{black, white, red, blue, purple};
     enum svg_values{x = 1, y = 3, color = 9}; // format array indexes where to find a certain value
     
-
-    M->size = atoi(format[1]); // got the maze size from svg file
-    feedMemory(M); // giving sufficient memory
+    if(sizeCheck(atoi(format[1])) == 0) // seeing if size is allowed
+        return 0;
+    M->size = atoi(format[1]);          // got the maze size from svg file
+    feedMemory(M);                      // giving sufficient memory
     short element;
     fgets(row, ROWMAX, svg); // getting rid of unnecessary info in the svg header
     for(int i = 0; i < M->size * M->size; i++){
