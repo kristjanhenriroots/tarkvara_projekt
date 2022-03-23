@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include <math.h>
 #include "header.h"
 
@@ -71,8 +72,8 @@ void fade_calculate(short *to, short *from, fade_t *fade_arr, int element){ // c
     fade_arr[element].direction = user;            // marking down the fade direction
 }
 
+
 short randomNr(int max, int count, short RGB[3]){ // if the user wants a random nr
-    srand(time(NULL));
     if(count < 3){
         return rand() % max;
     }
@@ -81,6 +82,7 @@ short randomNr(int max, int count, short RGB[3]){ // if the user wants a random 
     }
     return 0;
 }
+
 
 void get_colors(double *input, int mode, int type, fade_t *fade_arr){ // set the element colors
     static char options[5][30] = { {"walls"}, {"paths"}, {"recursive solution"}, {"shortest solution"}, {"algo crossover"} };
@@ -190,6 +192,7 @@ int round4(int x) {
 */
 
 int makeBMP(FILE *f, int mode, int mazetype, maze_t *M){ // making a BMP file from a maze matrix
+    srand(time(NULL));
     int height = M->size;
     int original = height;
     int width;
@@ -243,15 +246,24 @@ int makeBMP(FILE *f, int mode, int mazetype, maze_t *M){ // making a BMP file fr
         printf("77: Fully random\n");
         printf("99: Fade :o\n");
     }
+    
     int present_elements;
     if(mazetype == final_maze)                  // does the sent maze have a solution path
         present_elements = 5;                   // yes, there are 5 different elements
     else
         present_elements = 2;                   // no, there are 2 different elements (wall and path)
-    for(int i = 0; i < present_elements; i++){  // if an unsolved maze was given, no colors for solutions will be needed
-        get_colors(elements[i].rgb, mode, i, colorfade); // set colors for all present elements
+    
+    if(mode != insanity){
+        for(int i = 0; i < present_elements; i++){  // if an unsolved maze was given, no colors for solutions will be needed
+            get_colors(elements[i].rgb, mode, i, colorfade); // set colors for all present elements
+        }
     }
-
+    else if(mode == insanity){
+        for(int i = 0; i < 3; i++){
+            elements[wall].rgb[i] = 192;
+            elements[path].rgb[i] = 255;
+        }
+    }
     char *bitmap = (char *) malloc(bih.image_size * sizeof(char));  // actual bitmap to be written in the file
     int x_fade_count = 0; // elements with a color fade in both directions
     int y_fade_count = 0;
@@ -264,16 +276,23 @@ int makeBMP(FILE *f, int mode, int mazetype, maze_t *M){ // making a BMP file fr
                 x_fade_count++;
             else if(colorfade[i].direction == vertical)
                 y_fade_count++;
-        }
-           
+        }     
     }
     
     int i, j; // loop variables
+    int yprevious = 0, xprevious = 0;
+    short maze_value;
     for (int row = 0; row < height; row++){ // for every row
         if(row / upscale_factor == 0) // see if the maze row needs to be changed, actual file size is larger than the maze
             idy = 0;
         else
             idy = row / upscale_factor;
+        if(mode == insanity && (yprevious != idy || xprevious != idx)){
+            for(i = 0; i < 3; i++){
+                elements[wall].rgb[i] = rand() % 255;
+            }
+            //printf("%.0f %.0f %.0f\n", elements[wall].rgb[0], elements[wall].rgb[1], elements[wall].rgb[2]);
+        }
         for (int col = 0; col < width; col++){ // for every column
             if(col / upscale_factor == 0) // see if the maze column needs to be changed
                 idx = 0;
@@ -281,15 +300,16 @@ int makeBMP(FILE *f, int mode, int mazetype, maze_t *M){ // making a BMP file fr
                 idx = col / upscale_factor;
             for (int color = 0; color < 3; color++){ // add the R, G and B values
                 int index = row * padded_width + col * 3 + color; // find location in the bitmap
-                if(M->algo[mazetype].maze[original - 1 - idy][idx] == crossover)
+                maze_value = M->algo[mazetype].maze[original - 1 - idy][idx];
+                if(maze_value == crossover)
                     bitmap[index] = round(elements[crossover].rgb[color]);      // case: crossover
-                else if(M->algo[mazetype].maze[original - 1 - idy][idx] == breath_first)
+                else if(maze_value == breath_first)
                     bitmap[index] = round(elements[breath_first].rgb[color]);   // case: bfs algo
-                else if(M->algo[mazetype].maze[original - 1 - idy][idx] == wall)
+                else if(maze_value == wall)
                     bitmap[index] = round(elements[wall].rgb[color]);           // case: wall
-                else if(M->algo[mazetype].maze[original - 1 - idy][idx] == path)
+                else if(maze_value == path)
                     bitmap[index] = round(elements[path].rgb[color]);           // case: path
-                else if(M->algo[mazetype].maze[original - 1 - idy][idx] == recursive)
+                else if(maze_value == recursive)
                     bitmap[index] = round(elements[recursive].rgb[color]);      // case: recursive algo
             }
             if(x_fade_count > 0){ // if a horizontal color fade is present
@@ -298,6 +318,7 @@ int makeBMP(FILE *f, int mode, int mazetype, maze_t *M){ // making a BMP file fr
                         for(j = 0; j < 3; j++)
                             elements[i].rgb[j] += colorfade[i].fade[j]; // increment the RGB values
             }
+            xprevious = idx;
         }
         if(x_fade_count > 0){ // if a horizontal color fade is present
             for(i = 0; i < 5; i++)
@@ -311,6 +332,7 @@ int makeBMP(FILE *f, int mode, int mazetype, maze_t *M){ // making a BMP file fr
                     for(j = 0; j < 3; j++)
                         elements[i].rgb[j] += colorfade[i].fade[j]; // increment the RGB values
         }
+        yprevious = idy;
     }
     fwrite(bitmap, bih.image_size * sizeof(char), 1, f); // write the bitmap to the file
     fclose(f); // close the file

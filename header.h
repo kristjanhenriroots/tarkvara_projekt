@@ -16,8 +16,8 @@
 #define BMPTARGETSIZE   3000            // target bitmap width in pixels
 
 enum algoArr{generated, deadend, recursive, breath_first, final_maze};  // the same order the mazes are in the struct array
-enum bitmap_mode{regular, secret};                                      // for BMP file creation color menu
-enum element_type{wall, path, rec_path, bfs_path, crossover};                     // element type, used in BMP and SVG file creation
+enum bitmap_mode{regular, secret, insanity};                            // for BMP file creation color menu
+enum element_type{wall, path, rec_path, bfs_path, crossover};           // element type, used in BMP and SVG file creation
 
 
 // holding mazes
