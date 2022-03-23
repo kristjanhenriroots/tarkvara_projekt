@@ -249,6 +249,13 @@ int main(void){
                     makeBMP(getFilename(write, bmp_file, ask_user, generated), secret, generated, &M);
                 break; 
             }
+            case '^':
+                if(M.size == 0){
+                    printf("Generate something first ;)\n");
+                    break;
+                }
+                makeBMP(getFilename(write, bmp_file, ask_user, generated), insanity, generated, &M);
+            break;
         }
     }
     if(M.size > 0) // immediately leaving without generating would crash as the memory would be empty
