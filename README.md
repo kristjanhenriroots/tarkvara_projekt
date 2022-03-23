@@ -12,12 +12,12 @@ To run the code it is mandatory to download all .c files and compile them togeth
 and file count is subject to change and needs an according change to the command).
 
 Supported features:
-  > Creating mazes using 3 different generation algorithms including imperfect ones
-  > Supported sizes 7 - 499 (can exceed on your own risk)
-  > Solving mazes with 3 different algorithms, comparing the solution times and path lenghts
-  > Saving mazes in TXT, SVG and BMP file formats
-  > Reading mazes in TXT and SVG file formats
-  > Customizing bitmaps with 14 different colors and fades between any of them in a selected direction
+  * Creating mazes using 3 different generation algorithms including imperfect ones
+  * Supported sizes 7 - 499 (can exceed on your own risk)
+  * Solving mazes with 3 different algorithms, comparing the solution times and path lenghts
+  * Saving mazes in TXT, SVG and BMP file formats
+  * Reading mazes in TXT and SVG file formats
+  * Customizing bitmaps with 14 different colors and fades between any of them in a selected direction
 
 Tere,
 
