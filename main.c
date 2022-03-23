@@ -180,7 +180,7 @@ int main(void){
                 printf("Read from:\n 1. TXT file\n 2. SVG file\n");
                 scanf("%d", &usr_filetype);
                 usr_filetype--;
-                if(usr_filetype != 1 && usr_filetype != 2){
+                if(usr_filetype != txt_file && usr_filetype != svg_file){
                     printf("Invalid input\n");
                     break;
                 }
