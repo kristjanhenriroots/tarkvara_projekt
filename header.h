@@ -59,12 +59,12 @@ double bfs(int size, short **raw, short **sol, short exits[4]);         // breat
 
 // managing files 
 
-enum file_complexity{automatic, manual, ask_user};                                //  int complexity in manageFiles
-enum file_mode{read, write};                                            //  int mode in manageFiles
-enum file_type{txt_file, svg_file, bmp_file};                           //  the int filetype in manageFiles, 
+enum file_complexity{automatic, manual, ask_user};                          //  int complexity in manageFiles
+enum file_mode{read, write};                                                //  int mode in manageFiles
+enum file_type{txt_file, svg_file, bmp_file};                               //  the int filetype in manageFiles, 
                                                                             //makes for easier function calling                                                                        
 
-int manageFiles(int mode, int filetype, int complexity, int mazetype, maze_t *M);                                
+int manageFiles(int mode, int filetype, int complexity, int mazetype, maze_t *M); // central hub for file management                                
 
 FILE *getFilename(int mode, int filetype, int complexity, int mazetype);
 
@@ -74,5 +74,5 @@ int writeSVG(FILE *svg, maze_t *M, int mazetype);                       // makin
 
 int readSVG(FILE *svg, maze_t *M);                                      // reading SVG files
 
-int makeBMP(FILE *f, int mode, int mazetype, maze_t *M);                         // experimental, BMP file creation
+int makeBMP(FILE *f, int mode, int mazetype, maze_t *M);                // experimental, BMP file creation
 

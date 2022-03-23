@@ -107,7 +107,6 @@ void addBorders( short **cells, int size){
 }
 
 void Ellermaze(int size, short **maze){
-	printf("starting Eller generation\n");
 	int i, j;
 	short **cellsets = calloc(size+4, sizeof(short*));//create matrix for set identification
 	for(i = 0; i < size + 4; i++)

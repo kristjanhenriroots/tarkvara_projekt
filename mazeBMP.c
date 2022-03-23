@@ -268,7 +268,7 @@ int makeBMP(FILE *f, int mode, int mazetype, maze_t *M){ // making a BMP file fr
     }
     fwrite(bitmap, bih.image_size * sizeof(char), 1, f); // write the bitmap to the file
     fclose(f); // close the file
-    printf("upscaling x%d to %d\n", upscale_factor, height); // lets look at the upscale factor
+    printf("upscaling x%d to %d x %d px\n", upscale_factor, height, height); // lets look at the upscale factor
     free(bitmap); // free memory
     return 0;
 }
