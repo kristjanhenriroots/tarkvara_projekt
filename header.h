@@ -68,6 +68,8 @@ int manageFiles(int mode, int filetype, int complexity, int mazetype, maze_t *M)
 
 FILE *getFilename(int mode, int filetype, int complexity, int mazetype);
 
+void mazeReset(maze_t *M);                                              // resetting a solved maze
+
 int sizeCheck(int size);                                                // to check if maze size is allowed
 
 int writeSVG(FILE *svg, maze_t *M, int mazetype);                       // making the SVG file

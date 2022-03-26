@@ -274,8 +274,18 @@ int manageFiles(int mode, int filetype, int complexity, int mazetype, maze_t *M)
     }
 
     if(success == 1){ // maze is already solved, just warn the user
+        char user;
         printf("Warning, maze is already solved\n");
-        M->algo[final_maze].maze = M->algo[generated].maze; // if its solved it'll be added to appropriate place in the array
+        printf("Would you like to reset the maze to an unsolved state? y/n\n");
+        getchar();
+        scanf("%c", &user);
+        if(user == 'y'){
+            mazeReset(M);   // resetting the maze
+            printf("Maze reset successful\n");
+            return 0;    // mark the maze as unsolved
+        }
+        else
+            M->algo[final_maze].maze = M->algo[generated].maze; // if its solved it'll be added to appropriate place in the array
     }
 
     return success;
