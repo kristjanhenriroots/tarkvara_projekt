@@ -5,17 +5,15 @@
 #include <math.h>
 #include "header.h"
 
-// idea, insanity mode, completely random color every column?
-
-typedef struct needed_colors{ // holds the colors of all the maze elements
+typedef struct needed_colors{   // holds the colors of all the maze elements
     double rgb[3];
 }selected_t;
 
-typedef struct color_fade{ // color fade values
-    int size; // keeping maze size here
-    int direction; // horizontal or vertical
-    double fade[3]; // individual RGB change values per row / column
-    double original[3];
+typedef struct color_fade{      // color fade values
+    int size;                   // keeping maze size here
+    int direction;              // horizontal or vertical
+    double fade[3];             // individual RGB change values per row / column
+    double original[3];         // keeping the original color in case of horizontal fades
 }fade_t;
 
 
@@ -43,7 +41,6 @@ struct bitmap_image_header{
     unsigned int    clr_important;      // 4 bytes
 }bih;
 
-// note, always move fade last!!
 enum colors{white, silver, gray, black, purple, magenta, blue, lime, green, cyan, aqua, red, yellow, maroon, 
             random_list = 66, random_overall = 77, custom_RGB_code = 88, fade_cl = 99}; // all colors
 enum fade_direction{none, horizontal, vertical}; // fade direction
@@ -58,13 +55,12 @@ void fade_calculate(short *to, short *from, fade_t *fade_arr, int element){ // c
     for(int i = 0; i < 3; i++){ // for R, G and B
         fade_arr[element].fade[i] = abs(((double)(to[i]) - (double)(from[i]))) / (double)(fade_arr[0].size); // calculating the change in color per row
         if(to[i] < from[i])
-            fade_arr[element].fade[i] *= -1; // if a value needs to decrease it needs to change it to negative
-        fade_arr[element].original[i] = from[i];
+            fade_arr[element].fade[i] *= -1;        // if a value needs to decrease it needs to change it to negative
+        fade_arr[element].original[i] = from[i];    // saving the original color
     }
-    
 }
 
-
+// max = maximum random value, count = how many, RGB = give a full array random colors
 short randomNr(int max, int count, short RGB[3]){ // if the user wants a random nr
     if(count < 3){
         return rand() % max;
@@ -75,17 +71,18 @@ short randomNr(int max, int count, short RGB[3]){ // if the user wants a random 
     return 0;
 }
 
-int userselectRGB(double *input){
+int userselectRGB(double *input){ // letting the user select a fully custom color with an RGB code
     printf("Use format: 255 255 255\n");
     printf("Enter RGB code (NB! values have a range of 0 - 255): ");
-    scanf("%lf %lf %lf", &input[2], &input[1], &input[0]);
+    scanf("%lf %lf %lf", &input[2], &input[1], &input[0]); // holding the color in BGR format so input needs to be saved backwards
     for(int i = 0; i < 3; i++)
-        if(input[i] < 0 || input[i] > 255)
+        if(input[i] < 0 || input[i] > 255) // checking user input
             return 0;
     return 1;
 }
 
 void get_colors(double *input, int mode, int type, fade_t *fade_arr){ // set the element colors
+    // all maze elements
     static char options[5][30] = { {"walls"}, {"paths"}, {"recursive solution"}, {"shortest solution"}, {"algo crossover"} };
     
     // color library, note RGB values are backwards
@@ -109,19 +106,19 @@ void get_colors(double *input, int mode, int type, fade_t *fade_arr){ // set the
     if(mode == regular){ // preset colors, no input needed
         switch(type){
             case wall: // giving every element its color
-                set_color(input, colors[black]);
+                set_color(input, colors[black]);    // wall, default color: black
                 break;
             case path:
-                set_color(input, colors[white]);
+                set_color(input, colors[white]);    // path, default color: white
                 break;
             case recursive:
-                set_color(input, colors[red]);
+                set_color(input, colors[red]);      // recursive solution, default color: red
                 break;
             case breath_first:
-                set_color(input, colors[blue]);
+                set_color(input, colors[blue]);     // BFS solution, default color: blue
                 break;
             case crossover:
-                set_color(input, colors[purple]);
+                set_color(input, colors[purple]);   // solution crossover, default color: purple
                 break;
         }
     }
@@ -197,20 +194,23 @@ void get_colors(double *input, int mode, int type, fade_t *fade_arr){ // set the
                     set_color(input, gen_fade[start_color]);
                 }
                 break;
-            case random_list:       // user just wants a random color from the list
-                set_color(input, colors[randomNr(COLCOUNT, 0, NULL)]);
+            case random_list:                               // user just wants a random color from the list
+                fade_arr[type].direction = none;            // there is no fade
+                set_color(input, colors[randomNr(COLCOUNT, 0, NULL)]); 
+                break;                                      // get a random color between 0 and max colors, then set the input to it
+            case random_overall:                            // user wants a completely random color for element
+                fade_arr[type].direction = none;            // there is no fade
+                randomNr(255, 3, gen_fade[start_color]);    // using an array meant for fade colors but it'll do when not in use
+                set_color(input, gen_fade[start_color]);    // get 3 random colors for R, G and B, set the element to it
                 break;
-            case random_overall:    // user wants a completely random color for element
-                randomNr(255, 3, gen_fade[start_color]); // using an array meant for fade colors but it'll do when not in use
-                set_color(input, gen_fade[start_color]);
-                break;
-            case custom_RGB_code:
-                if(userselectRGB(input) == 0){
+            case custom_RGB_code:                           // user wants a custom color
+                fade_arr[type].direction = none;            // there is no fade
+                if(userselectRGB(input) == 0){              // ask for a color and check the function output
                     printf("Invalid input\n");
                     exit(0);
                 }
                 break;
-            default: // user messed something up
+            default:                                        // user messed something up, give up
                 printf("Invalid input\n");
                 exit(0);
         }
@@ -227,22 +227,22 @@ int round4(int x) {
                 **maze = maze matrix
                 mode = no color options or with selectable colors
                 present_elements = how many elements need colors,
-                    if the maze is not solved then only the wall and path colors are needed
+                                if the maze is not solved then only the wall and path colors are needed
 */
 
 int makeBMP(FILE *f, int mode, int mazetype, maze_t *M){ // making a BMP file from a maze matrix
-    srand(time(NULL));
-    int height = M->size;
-    int original = height;
-    int width;
-    int dpi = 1000;
-    int upscale_factor = BMPTARGETSIZE / height; // setting the upscale factor, all mazes will be roughly the same size
-    height *= upscale_factor;
+    srand(time(NULL));                                   // start time in case of random colors
+    int height = M->size;                                // mark actual maze size to element height
+    int original = height;                               // it will be known as original size
+    int width;                          
+    int dpi = 1000;                                      // bmp image dpi
+    int upscale_factor = BMPTARGETSIZE / height;         // setting the upscale factor, all mazes will be roughly the same size
+    height *= upscale_factor;                            // calculate new size and width according to upscaling
     width = height;
 
-    int padded_width = round4(width * 3); // calculating image and file size
-    int image_size = height * padded_width * 3;
-    int file_size = 54 + 4 * image_size;
+    int padded_width = round4(width * 3);                // calculating image and file size, in a bmp file colors have 4 bytes
+    int image_size = height * padded_width * 3;          // counting for padding size, actual image size
+    int file_size = 54 + 4 * image_size;                 // calculating file size, adding the header
     int ppm = dpi * 39.375;
 
     memcpy(&bfh.bitmap_type, "BM", 2); // setting up the file header
@@ -298,9 +298,9 @@ int makeBMP(FILE *f, int mode, int mazetype, maze_t *M){ // making a BMP file fr
             get_colors(elements[i].rgb, mode, i, colorfade); // set colors for all present elements
         }
     }
-    else if(mode == insanity){
+    else if(mode == insanity){              // every row is a new color
         for(int i = 0; i < 3; i++){
-            elements[wall].rgb[i] = 192;
+            elements[wall].rgb[i] = 192;    // just give a random value for now
             elements[path].rgb[i] = 255;
         }
     }
@@ -320,14 +320,14 @@ int makeBMP(FILE *f, int mode, int mazetype, maze_t *M){ // making a BMP file fr
     }
     
     int i, j; // loop variables
-    int yprevious = 0, xprevious = 0;
+    int yprevious = 0, xprevious = 0; // keeping track if were printing a new element from the maze matrix, necessary for insanity mode
     short maze_value;
     for (int row = 0; row < height; row++){ // for every row
         if(row / upscale_factor == 0) // see if the maze row needs to be changed, actual file size is larger than the maze
             idy = 0;
         else
             idy = row / upscale_factor;
-        if(mode == insanity && (yprevious != idy || xprevious != idx)){
+        if(mode == insanity && (yprevious != idy || xprevious != idx)){ // changing the color for every row if mode = insanity
             for(i = 0; i < 3; i++){
                 elements[wall].rgb[i] = rand() % 255;
             }
@@ -364,7 +364,7 @@ int makeBMP(FILE *f, int mode, int mazetype, maze_t *M){ // making a BMP file fr
             for(i = 0; i < 5; i++)
                 if(colorfade[i].direction == horizontal)
                     for(j = 0; j < 3; j++)
-                        elements[i].rgb[j] = colorfade[i].original[j]; // reset the RGB values
+                        elements[i].rgb[j] = colorfade[i].original[i]; // reset the RGB values
         }
         if(y_fade_count > 0){ // if a vertical color fade is present
             for(i = 0; i < 5; i++)

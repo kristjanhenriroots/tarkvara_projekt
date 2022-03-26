@@ -151,6 +151,16 @@ int solveMenu(maze_t *M){ // user wants to solve a maze
     return 0;
 }
 
+void mazeReset(maze_t *M){ // function to reset solved mazes, used when reading in already solved mazes
+    for(int i = 0; i < M->size; i++){
+        for(int j = 0; j < M->size; j++){
+            if(M->algo[generated].maze[i][j] > path)
+                M->algo[generated].maze[i][j] = path; // remove the solutions, just set them to 1 aka a path
+            M->algo[final_maze].maze[i][j] = 0;       // reset the final solution maze
+        }
+    }
+}
+
 int main(void){
     maze_t M;       // if you move this line below the int definition the program crashes????
     int inloop = 1, solved = 0, usr_filetype;
