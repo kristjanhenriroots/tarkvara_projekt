@@ -44,8 +44,8 @@ struct bitmap_image_header{
 }bih;
 
 // note, always move fade last!!
-enum colors{white, silver, gray, black, purple, magenta, blue, lime, green, cyan, teal, red, yellow, maroon, 
-            random_list = 66, random_overall = 77, fade_cl = 99}; // all colors
+enum colors{white, silver, gray, black, purple, magenta, blue, lime, green, cyan, aqua, red, yellow, maroon, 
+            random_list = 66, random_overall = 77, custom_RGB_code = 88, fade_cl = 99}; // all colors
 enum fade_direction{none, horizontal, vertical}; // fade direction
 
 void set_color(double *to, short from[3]){       // setting the actual RGB color to an element
@@ -59,17 +59,9 @@ void fade_calculate(short *to, short *from, fade_t *fade_arr, int element){ // c
         fade_arr[element].fade[i] = abs(((double)(to[i]) - (double)(from[i]))) / (double)(fade_arr[0].size); // calculating the change in color per row
         if(to[i] < from[i])
             fade_arr[element].fade[i] *= -1; // if a value needs to decrease it needs to change it to negative
-        fade_arr[element].original[i] = fade_arr[element].fade[i];
+        fade_arr[element].original[i] = from[i];
     }
-    int user = none;
-    while(user != horizontal && user != vertical){ // asking user for fade direction
-        printf(" 1. Horizontal fade\n");
-        printf(" 2. Vertical fade\n");
-        scanf("%d", &user);
-        if(user < 1 || user > 2)
-            printf("Invalid input\n");
-    }
-    fade_arr[element].direction = user;            // marking down the fade direction
+    
 }
 
 
@@ -83,6 +75,15 @@ short randomNr(int max, int count, short RGB[3]){ // if the user wants a random 
     return 0;
 }
 
+int userselectRGB(double *input){
+    printf("Use format: 255 255 255\n");
+    printf("Enter RGB code (NB! values have a range of 0 - 255): ");
+    scanf("%lf %lf %lf", &input[2], &input[1], &input[0]);
+    for(int i = 0; i < 3; i++)
+        if(input[i] < 0 || input[i] > 255)
+            return 0;
+    return 1;
+}
 
 void get_colors(double *input, int mode, int type, fade_t *fade_arr){ // set the element colors
     static char options[5][30] = { {"walls"}, {"paths"}, {"recursive solution"}, {"shortest solution"}, {"algo crossover"} };
@@ -99,7 +100,7 @@ void get_colors(double *input, int mode, int type, fade_t *fade_arr){ // set the
         {0, 255, 0},        // lime    
         {0, 128, 0},        // green   
         {255, 255, 0},      // cyan    
-        {128, 128, 0},      // teal    
+        {212, 255, 127},    // aqua    
         {0, 0, 255},        // red     
         {0, 255, 255},      // yellow  
         {0, 0, 128}         // maroon  
@@ -149,11 +150,22 @@ void get_colors(double *input, int mode, int type, fade_t *fade_arr){ // set the
                                 gen_fade[i][j] = colors[fade_inputs[i]][j]; // can't use set color due to gen_fade being short
                             break;
                         case random_list:       // giving the element a random color from the list 0 - 14
-                            fade_inputs[i] = randomNr(COLORCOUNT, 0, NULL); 
+                            fade_inputs[i] = randomNr(COLORCOUNT, 0, NULL);
+                            for(int j = 0; j < 3; j++)
+                                gen_fade[i][j] = colors[fade_inputs[i]][j]; // can't use set color due to gen_fade being short 
                             break;
                         case random_overall:    // giving the element a random R, G and B value 0 - 255
                             if(i > start_color)
                                 randomNr(255, 3, gen_fade[i]);
+                            break;
+                        case custom_RGB_code:
+                            if(userselectRGB(input) == 0){
+                                printf("Invalid input\n");
+                                exit(0);
+                            }
+                            for(int j = 0; j < 3; j++)
+                                gen_fade[i][j] = input[j]; // can't use set color due to gen_fade being short
+                            printf("%d: %hd %hd %hd\n", i, gen_fade[i][0], gen_fade[i][1], gen_fade[i][2]);
                             break;
                         default:
                             printf("Invalid input\n");
@@ -161,8 +173,29 @@ void get_colors(double *input, int mode, int type, fade_t *fade_arr){ // set the
                             break;
                     }
                 }
-                fade_calculate(gen_fade[end_color], gen_fade[start_color], fade_arr, type); // calculate fade
-                set_color(input, gen_fade[start_color]);
+                // horizontal is 1, vertical is 2
+                /*  printing a BMP starts from the bottom so to get the colors correct the start and end need to be
+                    different depending on the fade direction
+                */
+                int user = none;
+                while(user != horizontal && user != vertical){ // asking user for fade direction
+                    printf(" 1. Horizontal fade\n");
+                    printf(" 2. Vertical fade\n");
+                    scanf("%d", &user);
+                    if(user < horizontal || user > vertical)
+                        printf("Invalid input\n");
+                    getchar();
+                }
+                fade_arr[type].direction = user;            // marking down the fade direction
+                if(fade_arr[type].direction == vertical){
+                    fade_calculate(gen_fade[start_color], gen_fade[end_color], fade_arr, type); // calculate fade
+                    set_color(input, gen_fade[end_color]);
+                    
+                }   
+                else{
+                    fade_calculate(gen_fade[end_color], gen_fade[start_color], fade_arr, type); // calculate fade
+                    set_color(input, gen_fade[start_color]);
+                }
                 break;
             case random_list:       // user just wants a random color from the list
                 set_color(input, colors[randomNr(COLCOUNT, 0, NULL)]);
@@ -170,6 +203,12 @@ void get_colors(double *input, int mode, int type, fade_t *fade_arr){ // set the
             case random_overall:    // user wants a completely random color for element
                 randomNr(255, 3, gen_fade[start_color]); // using an array meant for fade colors but it'll do when not in use
                 set_color(input, gen_fade[start_color]);
+                break;
+            case custom_RGB_code:
+                if(userselectRGB(input) == 0){
+                    printf("Invalid input\n");
+                    exit(0);
+                }
                 break;
             default: // user messed something up
                 printf("Invalid input\n");
@@ -237,13 +276,14 @@ int makeBMP(FILE *f, int mode, int mazetype, maze_t *M){ // making a BMP file fr
         printf(" 0: White    |   7: Lime\n");
         printf(" 1: Silver   |   8: Green\n");
         printf(" 2: Gray     |   9: Cyan\n");
-        printf(" 3: Black    |  10: Teal\n");
+        printf(" 3: Black    |  10: Aqua\n");
         printf(" 4: Purple   |  11: Red\n");
         printf(" 5: Magenta  |  12: Yellow\n");
         printf(" 6: Blue     |  13: Maroon\n");
         printf("---------------------------\n");
         printf("66: Random from list\n");
         printf("77: Fully random\n");
+        printf("88: Custom RGB value\n");
         printf("99: Fade :o\n");
     }
     
@@ -302,15 +342,15 @@ int makeBMP(FILE *f, int mode, int mazetype, maze_t *M){ // making a BMP file fr
                 int index = row * padded_width + col * 3 + color; // find location in the bitmap
                 maze_value = M->algo[mazetype].maze[original - 1 - idy][idx];
                 if(maze_value == crossover)
-                    bitmap[index] = round(elements[crossover].rgb[color]);      // case: crossover
+                    bitmap[index] = elements[crossover].rgb[color];      // case: crossover
                 else if(maze_value == breath_first)
-                    bitmap[index] = round(elements[breath_first].rgb[color]);   // case: bfs algo
+                    bitmap[index] = elements[breath_first].rgb[color];   // case: bfs algo
                 else if(maze_value == wall)
-                    bitmap[index] = round(elements[wall].rgb[color]);           // case: wall
+                    bitmap[index] = elements[wall].rgb[color];           // case: wall
                 else if(maze_value == path)
-                    bitmap[index] = round(elements[path].rgb[color]);           // case: path
+                    bitmap[index] = elements[path].rgb[color];           // case: path
                 else if(maze_value == recursive)
-                    bitmap[index] = round(elements[recursive].rgb[color]);      // case: recursive algo
+                    bitmap[index] = elements[recursive].rgb[color];      // case: recursive algo
             }
             if(x_fade_count > 0){ // if a horizontal color fade is present
                 for(i = 0; i < 5; i++)
@@ -324,7 +364,7 @@ int makeBMP(FILE *f, int mode, int mazetype, maze_t *M){ // making a BMP file fr
             for(i = 0; i < 5; i++)
                 if(colorfade[i].direction == horizontal)
                     for(j = 0; j < 3; j++)
-                        elements[i].rgb[j] = colorfade[i].original[i]; // reset the RGB values
+                        elements[i].rgb[j] = colorfade[i].original[j]; // reset the RGB values
         }
         if(y_fade_count > 0){ // if a vertical color fade is present
             for(i = 0; i < 5; i++)
