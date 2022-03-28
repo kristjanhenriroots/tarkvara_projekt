@@ -31,9 +31,8 @@ void findneighbours(int P1, int P2, int *neighbours, int *neighbourcount, short 
 }
 
 int searchforcell (short **cells, int length, int* P1, int* P2, int *neighbours, int *neighbourcount, cellsets_s *cellsets, int counter, int visited[length*length/2]){
-    int countbuf = 1;
+    int countbuf;
     int visitedlength = counter;
-
     countbuf = (rand() % (visitedlength)) + 1;//picks an available cell from array
 	int start1 = cellsets[visited[countbuf]].P1;
 	int start2 = cellsets[visited[countbuf]].P2;
