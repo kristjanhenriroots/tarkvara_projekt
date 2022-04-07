@@ -9,7 +9,7 @@
 void generateEller(short **cells, short **cellsets, int size) {
 	srand(time(NULL));
 	int wallcounter = 0;
-	int RandNr = 2;
+	unsigned int RandNr = 2;
 	int setcounter = 0;
 	int setbuf;
 	int setcount;
@@ -121,5 +121,4 @@ void Ellermaze(int size, short **maze){
 	addBorders(maze, size);
 	for(i = 0; i < size + 4; i++)//free set identifications
 		free(cellsets[i]);
-
 }

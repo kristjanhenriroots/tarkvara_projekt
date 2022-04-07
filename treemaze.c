@@ -4,7 +4,6 @@
 #include <time.h>
 #include "header.h"
 
-
 typedef struct {//struct to number each cell
     int P1;
     int P2;
@@ -12,7 +11,7 @@ typedef struct {//struct to number each cell
 
 void findneighbours(int P1, int P2, int *neighbours, int *neighbourcount, short **cells, int length) {
 	*neighbourcount = 0;
-	if(P2 + 2 <= length && cells[P1][P2+2] == 0){//Checks all neigbours and puts 1 in array if there is a free neighbour in that position
+	if(P2 + 2 <= length && cells[P1][P2+2] == 0){//Checks all neighbours and puts 1 in array if there is a free neighbour in that position
 		neighbours[1] = 1;
 		(*neighbourcount)++;
 	}
