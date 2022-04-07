@@ -29,10 +29,23 @@ int getSize(maze_t *M){ // ask the user for the size
 
 void feedMemory(maze_t *M){ // allocate memory for mazes
     int i, j;
+    short **buf;
+    short *bufrow;
     for(i = 0; i < M->algoCount; i++){
-        M->algo[i].maze = (short**)calloc(M->size, (M->size) * sizeof(short*)); // feeding the behemoth memory
-        for(j = 0; j < M->size; j++)
-            M->algo[i].maze[j] = (short*)calloc(M->size, (M->size) * sizeof(short));
+        buf = (short**)calloc(M->size, (M->size) * sizeof(short*));
+        if (buf == NULL){
+            printf("Error allocating memory\n");
+            exit(0);
+        }
+        M->algo[i].maze = buf; // feeding the behemoth memory
+        for(j = 0; j < M->size; j++) {
+            bufrow = (short *) calloc(M->size, (M->size) * sizeof(short));
+            if (bufrow == NULL) {
+                printf("Error allocating memory\n");
+                exit(0);
+            }
+            M->algo[i].maze[j] = bufrow;
+        }
     }
 }
 
@@ -162,7 +175,7 @@ void mazeReset(maze_t *M){ // function to reset solved mazes, used when reading 
 }
 
 int main(void){
-    maze_t M;       // if you move this line below the int definition the program crashes????
+    maze_t M;// if you move this line below the int definition the program crashes????
     int inloop = 1, solved = 0, usr_filetype;
     //manageFiles(read, txt_file, ask_user, generated, &M);
 	//getSize(&M);
