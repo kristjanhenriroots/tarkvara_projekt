@@ -1,4 +1,5 @@
 # tarkvara_projekt
+# FOR GUI VERSION SEE JÖRGEN BRANCH
 TalTech Tarkvara Projekt 2022
 
 Hi,
