@@ -1,9 +1,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
-
-
-#define BILLION  1000000000.0
+#include "header.h"
 
 void eliminate(int size, short **maze, int x, int y){ // follow a dead end til an intersection
     int free = 0;
@@ -70,6 +68,6 @@ double deadEnd(int size, short **maze, short exits[4]){
     }
     clock_gettime(CLOCK_REALTIME, &end); // stop timer
     // time_spent = end - start
-    double time_spent = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / BILLION * 1000;
+    double time_spent = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / BILLION;
     return time_spent;
 }

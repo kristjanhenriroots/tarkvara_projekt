@@ -1,3 +1,5 @@
 *.bmp
 *.exe
 *.svg
+*.txt
+*.json

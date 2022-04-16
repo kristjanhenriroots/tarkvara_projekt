@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
+#include "header.h"
+
 
 void findExits(int size, short **maze, short exits[4]){
     exits[0] = 0;
