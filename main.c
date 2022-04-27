@@ -65,9 +65,11 @@ void printMain(){ // Commands
         "2: Solve labyrinth\n"
         "3: Read from file\n"
         "4: Save to file\n"
+        "C: Colours\n"
         "H: Help\n"
-        "X: Exit\n");
-        // ~: secret menu :o
+        "X: Exit\n"
+        );
+
 }
 
 int generateMenu(maze_t *M){ // user wanted to generate a maze
@@ -254,7 +256,7 @@ int main(void){
                 printf("Exiting program\n");
                 inloop = 0;
                 break;
-            case '~': {// secret menu
+            case 'C': {// secret menu
                 if(M.size == 0){
                     printf("Generate something first ;)\n");
                     break;
