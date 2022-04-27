@@ -65,7 +65,7 @@ void printMain(){ // Commands
         "2: Solve labyrinth\n"
         "3: Read from file\n"
         "4: Save to file\n"
-        "C: Colours\n"
+        "C: Colors\n"
         "H: Help\n"
         "X: Exit\n"
         );
@@ -256,7 +256,7 @@ int main(void){
                 printf("Exiting program\n");
                 inloop = 0;
                 break;
-            case 'C': {// secret menu
+            case 'C': {// Bitmap color select
                 if(M.size == 0){
                     printf("Generate something first ;)\n");
                     break;
