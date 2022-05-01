@@ -1,14 +1,15 @@
-
 #include "capp.h"
 
+// Public ---------------------------
 
 CApp::CApp()
 {
 	pConsole = nullptr;
 	Maze.size = 0;
 	Maze.algoCount = 5; // current nr
+	SolveDisplayedFlag = false;
 
-    // Added.
+	// Added.
 	Maze.algo = (data_t*)malloc((Maze.algoCount * sizeof(data_t))); // Allcoate algo mazes array.
 }
 
@@ -22,7 +23,7 @@ CApp::~CApp()
 	free(Maze.algo);
 }
 
-//removed MsgBox here.
+//removed MsgBox here. qq
 
 void CApp::SetConsole(P_CConsole _pConsole)
 {
@@ -30,14 +31,14 @@ void CApp::SetConsole(P_CConsole _pConsole)
 }
 
 //man
-int CApp::Generate(int _Algo, int _Lops, int _Size, P_COLOR_RGB _ElmntClr)
+int CApp::Generate(int _Mode, int _Algo, int _Lops, int _Size, P_COLOR_RGB _ElmntClr)
 {
 	struct timespec start, end; // keep accurate time
 	double time_spent;
 
 	if(Maze.size > 0) // something is already generated
 	{
-		pConsole->Print("Overwriting previous maze");
+		pConsole->Print("Overwriting previous maze\n");
 		freeMemory(&Maze);
 	}
 
@@ -56,12 +57,12 @@ int CApp::Generate(int _Algo, int _Lops, int _Size, P_COLOR_RGB _ElmntClr)
 		treemaze(Maze.size, Maze.algo[0].maze, _Algo, _Lops); // make a maze using Auris Prääm's TM generation algorithm
 		clock_gettime(CLOCK_REALTIME, &end); // stop timer
 	}
-	pConsole->Print("Generation successful");
+	pConsole->Print("Generation successful\n");
 	time_spent = ((end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec)) / BILLION; // calculate time spent in milliseconds
 
-	pConsole->Print("Generation time %.4f ms", (time_spent * 1000));
-	makeBMP(getFilename(write, bmp_file, automatic, generated), regular, _ElmntClr, none, generated, &Maze); // also make a BMP
-
+	pConsole->Print("Generation time %.4f ms\n", (time_spent * 1000));
+	makeBMP(getFilename(write, bmp_file, automatic, generated), _Mode , _ElmntClr, none, generated, &Maze); // also make a BMP
+	SolveDisplayedFlag = false;
 	return 0;
 }
 
@@ -73,14 +74,23 @@ int CApp::Solve(int _Mode, P_COLOR_RGB _ElmntClr, int _FadeDir)
 
 	if(Maze.size == 0) // see if there actually is a maze to solve
 	{
-		pConsole->Print("No maze to solve!");
+		pConsole->Print("No maze to solve!\n");
 		return 0;
 	}
+
+	for(i = 0; i < Maze.size; i++)
+	{
+		for(j = 0; j < Maze.size; j++)
+		{
+			Maze.algo[final_maze].maze[i][j] = 0;
+		}
+	}
+
 	for(j = 0; j < Maze.size; j++)
 	{
 		for(k = 0; k < Maze.size; k++)
 		{
-			Maze.algo[1].maze[j][k] = Maze.algo[0].maze[j][k]; // copy the values for dead end filler, it will destroy the original
+			Maze.algo[deadend].maze[j][k] = Maze.algo[generated].maze[j][k]; // copy the values for dead end filler, it will destroy the original
 		}
 	}
 
@@ -94,17 +104,21 @@ int CApp::Solve(int _Mode, P_COLOR_RGB _ElmntClr, int _FadeDir)
 	trec = recursion(Maze.size, Maze.algo[generated].maze, Maze.algo[recursive].maze, Maze.exits); // measuring time and solving
 	tbfs = bfs(Maze.size, Maze.algo[generated].maze, Maze.algo[breath_first].maze, Maze.exits); // measuring time and solving
 
-	pConsole->Print("Dead end solution %.4f ms", tdead * 1000);
-	pConsole->Print("Recursive backtracker %.4f ms", trec * 1000);
-	pConsole->Print("Breath first search %.4f ms", tbfs * 1000);
+	pConsole->Print("Dead end solution %.4f ms\n", tdead * 1000);
+	pConsole->Print("Recursive backtracker %.4f ms\n", trec * 1000);
+	pConsole->Print("Breath first search %.4f ms\n", tbfs * 1000);
 
 	for(i = 0; i < final_maze; i++)
 	{
 		if(i == 1) // don't want dead end filler showing
 			continue;
 		for(j = 0; j < Maze.size; j++)
+		{
 			for(k = 0; k < Maze.size; k++)
+			{
 				Maze.algo[final_maze].maze[j][k] +=  Maze.algo[i].maze[j][k]; // adding all layers up for the final solution
+			}
+		}
 	}
 	makeBMP(getFilename(write, bmp_file, automatic, final_maze), _Mode, _ElmntClr, _FadeDir, final_maze, &Maze); // also make a BMP
 
@@ -118,13 +132,64 @@ int CApp::Solve(int _Mode, P_COLOR_RGB _ElmntClr, int _FadeDir)
 	}
 	*/
 
+	SolveDisplayedFlag = true;
 	pConsole->Print("Solving complete, see program directory for raw.bmp and solved.bmp\n");
 
 	return 0;
 }
 
-//---------- extr, added
+int CApp::SetColor(P_COLOR_RGB _ElemntClr)  //------------------------------------------------------------------------------------------
+{
+	if(Maze.size > 0)
+	{
+		if(SolveDisplayedFlag == true) // Solved.
+		{
+			makeBMP(getFilename(write, bmp_file, automatic, final_maze), secret, _ElemntClr, none, final_maze, &Maze);
+			return 2;
+		}
+		else // Unsolved.
+		{
+			makeBMP(getFilename(write, bmp_file, automatic, generated), secret, _ElemntClr, none, generated, &Maze);
+			return 1;
+		}
+	}
 
+	return 0;
+}
+
+int CApp::SaveTxt(char *_Filename, int mazetype)
+{
+	return writeTXT(fopen(_Filename, "w"), &Maze, mazetype);
+}
+
+int CApp::LoadTxt(char *_Filename)
+{
+	SolveDisplayedFlag = readTXT(fopen(_Filename, "r"), &Maze);
+	return SolveDisplayedFlag;
+}
+
+int CApp::SaveSvg(char *_Filename, int mazetype)
+{
+	return writeSVG(fopen(_Filename, "w"), &Maze, mazetype);
+}
+
+int CApp::LoadSvg(char *_Filename)
+{
+	SolveDisplayedFlag = readSVG(fopen(_Filename, "r"), &Maze);
+	return SolveDisplayedFlag;
+}
+
+int CApp::IsSolved(void)
+{
+    return SolveDisplayedFlag;  //------------------------------------------------------------------------------------------------------
+}
+
+// Private -------------------------------
+
+
+
+
+//added
 // Alocate 2D matrix of integers.
 void CApp::Matrix2DShortAlloc(int _h, int _w, short ***_mtrx)
 {
@@ -171,7 +236,7 @@ void CApp::feedMemory(maze_t *M) // allocate memory for mazes
 		/*
 		*/
 	}
-	pConsole->Print("Memory allocated");
+	pConsole->Print("Memory allocated\n");
 }
 
 void CApp::freeMemory(maze_t *M)
@@ -588,7 +653,7 @@ int CApp::findExits(int size, short **maze, short *exits)
 
 	if(exits[0] == 0)
 	{
-			pConsole->Print("There is no entrance!!");
+			pConsole->Print("There is no entrance!!\n");
 			//exit(0);
 			return 1;
 	}
@@ -605,7 +670,7 @@ int CApp::findExits(int size, short **maze, short *exits)
 	}
 	if(exits[2] == 0)
 	{
-		pConsole->Print("There is no exit!!");
+		pConsole->Print("There is no exit!!\n");
 		//exit(0);
 		return 1;
 	}
@@ -750,7 +815,7 @@ double CApp::recursion(int size, short **raw, short **sol, short *exits)
 		// time_spent = end - start
 		double time_spent = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / BILLION;
 
-		pConsole->Print("Rec solution lenght %d squares", moves + 1);
+		pConsole->Print("Rec solution lenght %d squares\n", moves + 1);
 		return time_spent;
 }
 
@@ -836,7 +901,7 @@ void CApp::findPath(int size, short **sol, short **adjacent, short **previous, s
 		}
 		moves++;
 		sol[y][x] = 2; // marking the beginning as a path as well
-		pConsole->Print("BFS solution lenght %d squares", moves);
+		pConsole->Print("BFS solution lenght %d squares\n", moves);
 }
 
 int CApp::solve(int size, short **raw, short **sol, short *exits)
@@ -935,7 +1000,7 @@ double CApp::bfs(int size, short **raw, short **sol, short *exits)
 		// 1 = passage, 0 = wall
 		int result = solve(size, raw, sol, exits);
 		if(result == -1){
-				pConsole->Print("There is no solution!");
+				pConsole->Print("There is no solution!\n");
 				return 0;
 		}
 		clock_gettime(CLOCK_REALTIME, &end); // stop timer
@@ -998,7 +1063,7 @@ FILE *CApp::getFilename(int mode, int filetype, int complexity, int mazetype)
 				else
 						f = fopen(strcat(default_filenames[mazetype], default_extensions[filetype]), "r+");
 				if(f == NULL){
-						pConsole->Print("Error automatically opening file");                     // not supposed to go wrong
+						pConsole->Print("Error automatically opening file\n");                     // not supposed to go wrong
 						return NULL;
 				}
 				return f;
@@ -1057,15 +1122,19 @@ int CApp::readTXT(FILE *f, maze_t *M)
 						if(i == 0 && maze_element > 1){ // checking if input is an already solved maze, only need to check the first row
 								solved = 1;
 						}
-						if(maze_element < wall && maze_element > crossover){ // thats not our maze file!
-								pConsole->Print("Incorrect file!!");
+                        if(maze_element < wall && maze_element > crossover){ //not our maze file
+								pConsole->Print("Incorrect file!!\n");
 								return -1;
 						}
-						M->algo[generated].maze[i][j] = maze_element;
+						//M->algo[generated].maze[i][j] = maze_element;
+						if(solved)
+                            M->algo[final_maze].maze[i][j] = maze_element;   //added ----------------------------------------------
+						else
+							M->algo[generated].maze[i][j] = maze_element;
 				}
 		}
 
-		pConsole->Print("Maze read from text file");
+		pConsole->Print("Maze read from text file\n");
 		fclose(f);
 		return solved; // returning whether the read maze was already solved or not
 }
@@ -1073,7 +1142,7 @@ int CApp::readTXT(FILE *f, maze_t *M)
 int CApp::writeTXT(FILE *f, maze_t *M, int mazetype)
 { // writing to a txt file
 		if(M->size == 0){
-				pConsole->Print("No maze generated!"); // let's see if something is actually generated
+				pConsole->Print("No maze generated!\n"); // let's see if something is actually generated
 				return -1;
 		}
 
@@ -1085,7 +1154,7 @@ int CApp::writeTXT(FILE *f, maze_t *M, int mazetype)
 				}
 				fprintf(f, "\n");
 		}
-		pConsole->Print("Maze saved to text file");
+		pConsole->Print("Maze saved to text file\n");
 		fclose(f);
 		return 0;
 }
@@ -1118,9 +1187,9 @@ int CApp::readSVG(FILE *svg, maze_t *M)
 		int len = strlen(xml_header);
 		char row[ROWMAX];
 		fgets(row, ROWMAX, svg);
-		printf("%s\n", row);
+		pConsole->Print("%s\n", row);
 		if(strncmp(xml_header, row, len) != 0){           // checking if inserted file is svg
-				pConsole->Print("incorrect file type inserted!");
+				pConsole->Print("incorrect file type inserted!\n");
 				return -1;
 		}
 		char *format[COLCOUNT];                     //keeping strtok result here
@@ -1129,7 +1198,7 @@ int CApp::readSVG(FILE *svg, maze_t *M)
 
 		breakIt(format, fgets(row, ROWMAX, svg));   // getting maze size
 		int nr_format = atoi(format[1]);
-		pConsole->Print("SVG file maze size is %d", nr_format);
+		pConsole->Print("SVG file maze size is %d\n", nr_format);
 		/*
 		if(sizeCheck(nr_format) == 0)         // seeing if size is allowed
 				return -1;
@@ -1142,17 +1211,21 @@ int CApp::readSVG(FILE *svg, maze_t *M)
 				breakIt(format, fgets(row, ROWMAX, svg));
 				element = findElement(format[color]);
 				if(element == -1){
-						pConsole->Print("Unknown value present");  // value not supposed to be in svg file
+						pConsole->Print("Unknown value present\n");  // value not supposed to be in svg file
 						freeMemory(M);                      // free memory and set size to 0 again
 						M->size = 0;
 						return -1;
 				}
 				else if(i < M->size && element > 1)     // checking if the maze is already solved, only need to check the first row
 						solved = 1;
-				M->algo[generated].maze[atoi(format[y])][atoi(format[x])] = element; // write maze data
+				//M->algo[generated].maze[atoi(format[y])][atoi(format[x])] = element; // write maze data
+				if(solved)
+                    M->algo[final_maze].maze[atoi(format[y])][atoi(format[x])] = element; // write maze data //changed -----------------------
+				else
+                    M->algo[generated].maze[atoi(format[y])][atoi(format[x])] = element; // write maze data
 		}
 
-		pConsole->Print("SVG file successfully read, maze size %d", M->size);
+		pConsole->Print("SVG file successfully read, maze size %d\n", M->size);
 		fclose(svg);
 		return solved; // return is maze was solved or not
 }
@@ -1160,7 +1233,7 @@ int CApp::readSVG(FILE *svg, maze_t *M)
 int CApp::writeSVG(FILE *svg, maze_t *M, int mazetype)
 { // write to SVG file
 		if(M->size == 0){
-				pConsole->Print("No maze generated!"); // let's see if something is actually generated
+				pConsole->Print("No maze generated!\n"); // let's see if something is actually generated
 				return -1;
 		}
 		int value;
@@ -1187,7 +1260,7 @@ int CApp::writeSVG(FILE *svg, maze_t *M, int mazetype)
 	fprintf(svg, "</g>"); // SVG footer
 	fprintf(svg, "</svg>\n");
 	fclose(svg);
-		printf("SVG file saved\n");
+	pConsole->Print("SVG file saved\n");
 		return 0;
 }
 
@@ -1202,7 +1275,7 @@ int CApp::writeSVG(FILE *svg, maze_t *M, int mazetype)
 int CApp::manageFiles(int mode, int filetype, int complexity, int mazetype, maze_t *M)
 {
 		if(mode == read && M->size > 0){ // something is already in memory
-				printf("Overwriting previous maze\n");
+				pConsole->Print("Overwriting previous maze\n");
 				freeMemory(M);
 		}
 		int success = 0;
@@ -1590,7 +1663,7 @@ int CApp::makeBMP(FILE *f, int mode, P_COLOR_RGB _ElmntClr, int _FadeDir, int ma
 				}
 		}
 		else if(mode == insanity){              // every row is a new color
-				for(int i = 0; i < 3; i++){
+                for(int i = 0; i < 3; i++){
 						elements[wall].rgb[i] = 192;    // just give a random value for now
 						elements[path].rgb[i] = 255;
 				}
@@ -1619,7 +1692,7 @@ int CApp::makeBMP(FILE *f, int mode, P_COLOR_RGB _ElmntClr, int _FadeDir, int ma
 				else
 						idy = row / upscale_factor;
 				if(mode == insanity && (yprevious != idy || xprevious != idx)){ // changing the color for every row if mode = insanity
-						for(i = 0; i < 3; i++){
+                        for(i = 0; i < 3; i++){
 								elements[wall].rgb[i] = rand() % 255;
 						}
 						//printf("%.0f %.0f %.0f\n", elements[wall].rgb[0], elements[wall].rgb[1], elements[wall].rgb[2]);
@@ -1673,4 +1746,4 @@ int CApp::makeBMP(FILE *f, int mode, P_COLOR_RGB _ElmntClr, int _FadeDir, int ma
 		return 0;
 }
 
-//-----------
+//-----------------

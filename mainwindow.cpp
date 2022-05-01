@@ -1,6 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+// Public
+
 
 // Constructor..
 MainWindow::MainWindow(QWidget *parent):QMainWindow(parent), ui(new Ui::MainWindow)
@@ -15,20 +17,21 @@ MainWindow::MainWindow(QWidget *parent):QMainWindow(parent), ui(new Ui::MainWind
 	pConsole->SetPlainTextEdit(ui->edtConsole);
 
 	// Connect UI signals..
-	connect(ui->radAlgo1, &QPushButton::pressed, this, &MainWindow::btnAlg1OnPressed); // Algo1 'Pressed'.
-	connect(ui->radAlgo2, &QPushButton::pressed, this, &MainWindow::btnAlg2OnPressed); // Algo2 'Pressed'.
-	connect(ui->radAlgo3, &QPushButton::pressed, this, &MainWindow::btnAlg3OnPressed); // Algo3 'Pressed'.
-	connect(ui->spnSiz, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainWindow::spnSizOnChanged); // Maze size 'Changed'.
-	connect(ui->btnGen, &QPushButton::pressed, this, &MainWindow::btnGenOnPressed); // Generate 'Pressed'.
 	connect(ui->btnClrWall, &QPushButton::pressed, this, &MainWindow::btnClrWallOnPressed); // Color walls 'Pressed'.
 	connect(ui->btnClrPath, &QPushButton::pressed, this, &MainWindow::btnClrPathOnPressed); // Color path 'Pressed'.
 	connect(ui->btnClrRecPath, &QPushButton::pressed, this, &MainWindow::btnClrRecPathOnPressed); // Color recursive path 'Pressed'.
 	connect(ui->btnClrBfsPath, &QPushButton::pressed, this, &MainWindow::btnClrBfsPathOnPressed); // Color bfs path 'Pressed'.
 	connect(ui->btnClrCros, &QPushButton::pressed, this, &MainWindow::btnClrCrosOnPressed); // Color crosover 'Pressed'.
-	connect(ui->btnClrFadeS, &QPushButton::pressed, this, &MainWindow::btnClrFadeSOnPressed); // Color fade start 'Pressed'.
-	connect(ui->btnClrFadeE, &QPushButton::pressed, this, &MainWindow::btnClrFadeEOnPressed); // Color fade end 'Pressed'.
 	connect(ui->btnClrRst, &QPushButton::pressed, this, &MainWindow::btnClrRstOnPressed); // Color reset 'Pressed'.
+	connect(ui->radAlgo1, &QPushButton::pressed, this, &MainWindow::btnAlg1OnPressed); // Algo1 'Pressed'.
+	connect(ui->radAlgo2, &QPushButton::pressed, this, &MainWindow::btnAlg2OnPressed); // Algo2 'Pressed'.
+	connect(ui->radAlgo3, &QPushButton::pressed, this, &MainWindow::btnAlg3OnPressed); // Algo3 'Pressed'.
+	connect(ui->spnSiz, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainWindow::spnSizOnChanged); // Maze size 'Changed'.
+	connect(ui->btnGen, &QPushButton::pressed, this, &MainWindow::btnGenOnPressed); // Generate 'Pressed'.
+	connect(ui->btnGenSave, &QPushButton::pressed, this, &MainWindow::btnGenSaveOnPressed); // Save generate 'Pressed'.
+	connect(ui->btnGenLoad, &QPushButton::pressed, this, &MainWindow::btnGenLoadOnPressed); // Load generate 'Pressed'.
 	connect(ui->btnSolv, &QPushButton::pressed, this, &MainWindow::btnSolvOnPressed); // Solve 'Pressed'.
+	connect(ui->btnSolvSave, &QPushButton::pressed, this, &MainWindow::btnSolvSaveOnPressed); // Save solved 'Pressed'.
 
 	// Setup spines..
 	ui->spnSiz->setMinimum(MAZEMIN); // Maze size: Min.
@@ -62,11 +65,120 @@ MainWindow::~MainWindow()
 	delete ui;
 }
 
-//p
+//privatee ----------------------
 
 /*
  * UI signal procedures.
  */
+
+// Color wall 'Pressed'
+void MainWindow::btnClrWallOnPressed(void)
+{
+	QColor color, colorNew;
+
+	color.setRgb(Colors[wall].Red, Colors[wall].Green, Colors[wall].Blue);
+
+	colorNew = QColorDialog::getColor(color, parentWidget());
+	if(!colorNew.isValid())
+		return;
+
+	Colors[wall].Red = colorNew.red();
+	Colors[wall].Green = colorNew.green();
+	Colors[wall].Blue = colorNew.blue();
+
+	color.setRgb(Colors[wall].Red, Colors[wall].Green, Colors[wall].Blue);
+	ui->btnClrWall->setStyleSheet("background-color: " + color.name());
+	ChangeDisplayedColor();
+}
+
+// Color path 'Pressed'.
+void MainWindow::btnClrPathOnPressed(void)
+{
+	QColor color, colorNew;
+
+	color.setRgb(Colors[path].Red, Colors[path].Green, Colors[path].Blue);
+
+	colorNew = QColorDialog::getColor(color, parentWidget());
+	if(!colorNew.isValid())
+		return;
+
+	Colors[path].Red = colorNew.red();
+	Colors[path].Green = colorNew.green();
+	Colors[path].Blue = colorNew.blue();
+
+	color.setRgb(Colors[path].Red, Colors[path].Green, Colors[path].Blue);
+	ui->btnClrPath->setStyleSheet("background-color: " + color.name());
+	ChangeDisplayedColor();
+}
+
+// Color recursive path 'Pressed'.
+void MainWindow::btnClrRecPathOnPressed(void)
+{
+	QColor color, colorNew;
+
+	color.setRgb(Colors[rec_path].Red, Colors[rec_path].Green, Colors[rec_path].Blue);
+
+	colorNew = QColorDialog::getColor(color, parentWidget());
+	if(!colorNew.isValid())
+		return;
+
+	Colors[rec_path].Red = colorNew.red();
+	Colors[rec_path].Green = colorNew.green();
+	Colors[rec_path].Blue = colorNew.blue();
+
+	color.setRgb(Colors[rec_path].Red, Colors[rec_path].Green, Colors[rec_path].Blue);
+	ui->btnClrRecPath->setStyleSheet("background-color: " + color.name());
+	ChangeDisplayedColor();
+}
+
+// Color BFS path 'Pressed'.
+void MainWindow::btnClrBfsPathOnPressed(void)
+{
+	QColor color, colorNew;
+
+	color.setRgb(Colors[bfs_path].Red, Colors[bfs_path].Green, Colors[bfs_path].Blue);
+
+	colorNew = QColorDialog::getColor(color, parentWidget());
+	if(!colorNew.isValid())
+		return;
+
+	Colors[bfs_path].Red = colorNew.red();
+	Colors[bfs_path].Green = colorNew.green();
+	Colors[bfs_path].Blue = colorNew.blue();
+
+	color.setRgb(Colors[bfs_path].Red, Colors[bfs_path].Green, Colors[bfs_path].Blue);
+	ui->btnClrBfsPath->setStyleSheet("background-color: " + color.name());
+	ChangeDisplayedColor();
+}
+
+// Color crossover 'Pressed'.
+void MainWindow::btnClrCrosOnPressed(void)
+{
+	QColor color, colorNew;
+
+	color.setRgb(Colors[crossover].Red, Colors[crossover].Green, Colors[crossover].Blue);
+
+	colorNew = QColorDialog::getColor(color, parentWidget());
+	if(!colorNew.isValid())
+		return;
+
+	Colors[crossover].Red = colorNew.red();
+	Colors[crossover].Green = colorNew.green();
+	Colors[crossover].Blue = colorNew.blue();
+
+	color.setRgb(Colors[crossover].Red, Colors[crossover].Green, Colors[crossover].Blue);
+	ui->btnClrCros->setStyleSheet("background-color: " + color.name());
+	ChangeDisplayedColor();
+}
+
+// Color reset 'Pressed'
+void MainWindow::btnClrRstOnPressed(void)
+{
+	ClrRst();
+		//ui->radFadeN->setChecked(true);
+	ui->chkClrIns->setChecked(false);
+		ChangeDisplayedColor();
+}
 
 // Algo1 'Pressed'.
 void MainWindow::btnAlg1OnPressed(void)
@@ -95,7 +207,7 @@ void MainWindow::spnSizOnChanged(int _Val)
 	// Maze size must be an odd number!!..
 
 	// Automatic on the fly 'even' to 'odd' conversion,
-    // This may interfere with direct manual input!.. uhhhhhhhh
+    // This may interfere with direct manual input!.. uhhhhhhhh +++++++++++++++++++++++++++
 	if((_Val % 2) == 0) // Even!
 	{
 		_Val++; // Odd it.
@@ -106,7 +218,7 @@ void MainWindow::spnSizOnChanged(int _Val)
 // Generate 'Pressed'.
 void MainWindow::btnGenOnPressed(void)
 {
-	int algo, lops, siz;
+	int algo, lops, siz, mode;
 
 	algo = null;
 	lops = 0;
@@ -136,150 +248,79 @@ void MainWindow::btnGenOnPressed(void)
 
 	siz = ui->spnSiz->text().toInt(); // Get size.
 
-	pApp->Generate(algo, lops, siz, Colors); // Generate.
+	mode = secret;
+	if(ui->chkClrIns->isChecked())
+	{
+		 mode = insanity;
+	}
+
+	pApp->Generate(mode, algo, lops, siz, Colors); // Generate.
 
 	ViewImage("raw.bmp");
 }
 
-// Color wall 'Pressed'
-void MainWindow::btnClrWallOnPressed(void)
+// Save generated 'Pressed'.
+void MainWindow::btnGenSaveOnPressed(void)
 {
-	QColor color, colorNew;
+	QString Filename;
 
-	color.setRgb(Colors[wall].Red, Colors[wall].Green, Colors[wall].Blue);
-
-	colorNew = QColorDialog::getColor(color, parentWidget());
-	if(!colorNew.isValid())
+	// Get filename..
+	Filename = QFileDialog::getSaveFileName(this, tr("Save generated maze"), nullptr, tr("Text(*.txt);;Scalable Vector Graphics(*.svg)"));
+	if(Filename.isNull()) // Cancled..
+	{
 		return;
+	}
 
-	Colors[wall].Red = colorNew.red();
-	Colors[wall].Green = colorNew.green();
-	Colors[wall].Blue = colorNew.blue();
-
-	color.setRgb(Colors[wall].Red, Colors[wall].Green, Colors[wall].Blue);
-	ui->btnClrWall->setStyleSheet("background-color: " + color.name());
+	if(Filename.endsWith(".txt")) // Text.
+	{
+		pApp->SaveTxt(Filename.toLocal8Bit().data(), generated);
+	}
+	else if(Filename.endsWith(".svg")) // SVG.
+	{
+		pApp->SaveSvg(Filename.toLocal8Bit().data(), generated);
+	}
+	else // Unrecognized.
+	{
+		pConsole->Print("Error!: Unrecognized format!.\n");
+	}
 }
 
-// Color path 'Pressed'.
-void MainWindow::btnClrPathOnPressed(void)
+// Load generated 'Pressed'.
+void MainWindow::btnGenLoadOnPressed(void)
 {
-	QColor color, colorNew;
+	QString Filename;
 
-	color.setRgb(Colors[path].Red, Colors[path].Green, Colors[path].Blue);
-
-	colorNew = QColorDialog::getColor(color, parentWidget());
-	if(!colorNew.isValid())
+	// Get filename..
+	Filename = QFileDialog::getOpenFileName(this, tr("Load generated maze"), nullptr, tr("Text(*.txt);;Scalable Vector Graphics(*.svg)"));
+	if(Filename.isNull()) // Cancled..
+	{
 		return;
+	}
 
-	Colors[path].Red = colorNew.red();
-	Colors[path].Green = colorNew.green();
-	Colors[path].Blue = colorNew.blue();
-
-	color.setRgb(Colors[path].Red, Colors[path].Green, Colors[path].Blue);
-	ui->btnClrPath->setStyleSheet("background-color: " + color.name());
-}
-
-// Color recursive path 'Pressed'.
-void MainWindow::btnClrRecPathOnPressed(void)
-{
-	QColor color, colorNew;
-
-	color.setRgb(Colors[rec_path].Red, Colors[rec_path].Green, Colors[rec_path].Blue);
-
-	colorNew = QColorDialog::getColor(color, parentWidget());
-	if(!colorNew.isValid())
+	if(Filename.endsWith(".txt")||Filename.endsWith(".TXT")) // Text.
+	{
+		pApp->LoadTxt(Filename.toLocal8Bit().data());
+	}
+	else if(Filename.endsWith(".svg")||Filename.endsWith(".SVG")) // SVG.
+	{
+		pApp->LoadSvg(Filename.toLocal8Bit().data());
+	}
+	else // Unrecognized.
+	{
+		pConsole->Print("Error!: Unrecognized format!.\n");
 		return;
+	}
 
-	Colors[rec_path].Red = colorNew.red();
-	Colors[rec_path].Green = colorNew.green();
-	Colors[rec_path].Blue = colorNew.blue();
-
-	color.setRgb(Colors[rec_path].Red, Colors[rec_path].Green, Colors[rec_path].Blue);
-	ui->btnClrRecPath->setStyleSheet("background-color: " + color.name());
-}
-
-// Color BFS path 'Pressed'.
-void MainWindow::btnClrBfsPathOnPressed(void)
-{
-	QColor color, colorNew;
-
-	color.setRgb(Colors[bfs_path].Red, Colors[bfs_path].Green, Colors[bfs_path].Blue);
-
-	colorNew = QColorDialog::getColor(color, parentWidget());
-	if(!colorNew.isValid())
-		return;
-
-	Colors[bfs_path].Red = colorNew.red();
-	Colors[bfs_path].Green = colorNew.green();
-	Colors[bfs_path].Blue = colorNew.blue();
-
-	color.setRgb(Colors[bfs_path].Red, Colors[bfs_path].Green, Colors[bfs_path].Blue);
-	ui->btnClrBfsPath->setStyleSheet("background-color: " + color.name());
-}
-
-// Color crossover 'Pressed'.
-void MainWindow::btnClrCrosOnPressed(void)
-{
-	QColor color, colorNew;
-
-	color.setRgb(Colors[crossover].Red, Colors[crossover].Green, Colors[crossover].Blue);
-
-	colorNew = QColorDialog::getColor(color, parentWidget());
-	if(!colorNew.isValid())
-		return;
-
-	Colors[crossover].Red = colorNew.red();
-	Colors[crossover].Green = colorNew.green();
-	Colors[crossover].Blue = colorNew.blue();
-
-	color.setRgb(Colors[crossover].Red, Colors[crossover].Green, Colors[crossover].Blue);
-	ui->btnClrCros->setStyleSheet("background-color: " + color.name());
-}
-
-// Color fade start 'Pressed'.
-void MainWindow::btnClrFadeSOnPressed(void)
-{
-	QColor color, colorNew;
-
-	color.setRgb(Colors[fade_start].Red, Colors[fade_start].Green, Colors[fade_start].Blue);
-
-	colorNew = QColorDialog::getColor(color, parentWidget());
-	if(!colorNew.isValid())
-		return;
-
-	Colors[fade_start].Red = colorNew.red();
-	Colors[fade_start].Green = colorNew.green();
-	Colors[fade_start].Blue = colorNew.blue();
-
-	color.setRgb(Colors[fade_start].Red, Colors[fade_start].Green, Colors[fade_start].Blue);
-	ui->btnClrFadeS->setStyleSheet("background-color: " + color.name());
-}
-
-// Color fade end 'Pressed'.
-void MainWindow::btnClrFadeEOnPressed(void)
-{
-	QColor color, colorNew;
-
-	color.setRgb(Colors[fade_end].Red, Colors[fade_end].Green, Colors[fade_end].Blue);
-
-	colorNew = QColorDialog::getColor(color, parentWidget());
-	if(!colorNew.isValid())
-		return;
-
-	Colors[fade_end].Red = colorNew.red();
-	Colors[fade_end].Green = colorNew.green();
-	Colors[fade_end].Blue = colorNew.blue();
-
-	color.setRgb(Colors[fade_end].Red, Colors[fade_end].Green, Colors[fade_end].Blue);
-	ui->btnClrFadeE->setStyleSheet("background-color: " + color.name());
-}
-
-// Color reset 'Pressed'
-void MainWindow::btnClrRstOnPressed(void)
-{
-	ClrRst();
-	ui->radFadeN->setChecked(true);
-	ui->chkClrIns->setChecked(false);
+	// Refresh.
+	pApp->SetColor(Colors);
+	if(pApp->IsSolved()) // Solved.
+	{
+		ViewImage("solved.bmp");
+	}
+	else // Raw.
+	{
+		ViewImage("raw.bmp");
+	}
 }
 
 // Solve 'Pressed'.
@@ -288,29 +329,38 @@ void MainWindow::btnSolvOnPressed(void)
 	int mode, fadeDir;
 
 	mode = secret;
-	if(ui->chkClrIns->isChecked())
-	{
-		mode = insanity;
-	}
 
 	fadeDir = none;
-	/*
-	if(ui->radFadeH->isChecked())
-	{
-		fadeDir = horizontal;
-	}
-	if(ui->radFadeV->isChecked())
-	{
-		fadeDir = vertical;
-	}
-	*/
 	pApp->Solve(mode, Colors, fadeDir);
 
 	ViewImage("solved.bmp");
 }
 
+// Save solved 'Pressed'.
+void MainWindow::btnSolvSaveOnPressed(void)
+{
+	QString Filename;
 
+	// Get filename..
+	Filename = QFileDialog::getSaveFileName(this, tr("Save solved maze"), nullptr, tr("Text(*.txt);;Scalable Vector Graphics(*.svg)"));
+	if(Filename.isNull()) // Cancled..
+	{
+		return;
+	}
 
+	if(Filename.endsWith(".txt")) // Text.
+	{
+		pApp->SaveTxt(Filename.toLocal8Bit().data(), final_maze);
+	}
+	else if(Filename.endsWith(".svg")) // SVG.
+	{
+		pApp->SaveSvg(Filename.toLocal8Bit().data(), final_maze);
+	}
+	else // Unrecognized.
+	{
+		pConsole->Print("Error!: Unrecognized format!.\n");
+	}
+}
 
 /*
  * UI window events.
@@ -321,9 +371,6 @@ void MainWindow::resizeEvent(QResizeEvent *_pQResizeEvent)
 {
 	QMainWindow::resizeEvent(_pQResizeEvent);
 }
-
-
-
 
 /*
  * Functions.
@@ -364,18 +411,6 @@ void MainWindow::ClrRst(void)
 	Colors[crossover].Blue = 128;
 	color.setRgb(Colors[crossover].Red, Colors[crossover].Green, Colors[crossover].Blue);
 	ui->btnClrCros->setStyleSheet( "background-color: " + color.name() );
-	// Fade start
-	Colors[fade_start].Red = 0;
-	Colors[fade_start].Green = 64;
-	Colors[fade_start].Blue = 64;
-	color.setRgb(Colors[fade_start].Red, Colors[fade_start].Green, Colors[fade_start].Blue);
-	ui->btnClrFadeS->setStyleSheet( "background-color: " + color.name() );
-	// Fade end
-	Colors[fade_end].Red = 0;
-	Colors[fade_end].Green = 220;
-	Colors[fade_end].Blue = 220;
-	color.setRgb(Colors[fade_end].Red, Colors[fade_end].Green, Colors[fade_end].Blue);
-	ui->btnClrFadeE->setStyleSheet( "background-color: " + color.name() );
 }
 
 // Display image file.
@@ -386,4 +421,13 @@ int MainWindow::ViewImage(const char *_Filename)
 	return 0;
 }
 
-//----------
+void MainWindow::ChangeDisplayedColor(void)
+{
+	short setting = pApp->SetColor(Colors);
+	if(setting == 2)
+		ViewImage("solved.bmp");
+	else if(setting == 1)
+		ViewImage("raw.bmp");
+}
+
+//--------------------------

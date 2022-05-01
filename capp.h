@@ -13,11 +13,10 @@
 // Application ID..
 #define APP_NAME "Labyrinth generator & resolver"
 #define APP_VER_MAJOR 0
-#define APP_VER_MINOR 3
-#define APP_VER_BUILD 20220413
+#define APP_VER_MINOR 4
+#define APP_VER_BUILD 20220428
 
 // macros
-
 #define ROWMAX          100             // maximum lenght of SVG file row
 #define COLCOUNT        10              // SVG file max columns
 #define NAMELEN         30              // max length for string inputs
@@ -202,9 +201,14 @@ public:
 	~CApp();
 
 	void SetConsole(P_CConsole _pCConsole);
-	int MsgBox(const char *_String, ...);
-	int Generate(int _Algo, int lops, int _size, P_COLOR_RGB _ElmntClr);
+	int Generate(int _Mode, int _Algo, int lops, int _size, P_COLOR_RGB _ElmntClr);
 	int Solve(int _Mode, P_COLOR_RGB _ElmntClr, int _FadeDir);
+	int SetColor(P_COLOR_RGB _ElemntClr);
+	int SaveTxt(char *_Filename, int mazetype);
+	int LoadTxt(char *_Filename);
+	int SaveSvg(char *_Filename, int mazetype);
+	int LoadSvg(char *_Filename);
+	int IsSolved(void);
 
 private:
 	P_CConsole pConsole;
@@ -212,8 +216,9 @@ private:
 	int moves;
 	bitmap_file_header bfh;
 	bitmap_image_header bih;
+	bool SolveDisplayedFlag;
 
-    // Added
+	// Added
 	void Matrix2DShortAlloc(int _h, int _w, short ***_mtrx);
 	void Matrix2DShortFree(int _h, short **_mtrx);
 	// General
@@ -224,7 +229,7 @@ private:
 	int generateMenu(maze_t *M);
 	int solveMenu(maze_t *M);
 	// ellermaze
-	void generateEller(short **cells, short **cellsets, int size);					// maze generation
+    void generateEller(short **cells, short **cellsets, int size);			// maze generation
 	void addBorders(short **cells, int size);                               // adds borders for maze generation
 	void Ellermaze(int size, short **maze);                                 // maze generation using Eller's algorithm
 	// treemaze
@@ -266,7 +271,8 @@ private:
 	int userselectRGB(double *input);
 	void get_colors(double *input, int mode, P_COLOR_RGB _ElmntClr, int _FadeDir, int type, fade_t *fade_arr);
 	int round4(int x);
-	int makeBMP(FILE *f, int mode, P_COLOR_RGB _ElmntClr, int _FadeDir, int mazetype, maze_t *M);                // experimental, BMP file creation
+	int makeBMP(FILE *f, int mode, P_COLOR_RGB _ElmntClr, int _FadeDir, int mazetype, maze_t *M);
+	// experimental, BMP file creation
 };
 typedef CApp *P_CApp;
 

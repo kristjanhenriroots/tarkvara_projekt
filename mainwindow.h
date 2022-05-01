@@ -31,28 +31,31 @@ private:
 	P_CApp pApp;
 
 	// UI signal procedures..
-	void btnAlg1OnPressed(void); // Algo1 'Pressed'.
-	void btnAlg2OnPressed(void); // Algo2 'Pressed'.
-	void btnAlg3OnPressed(void); // Algo3 'Pressed'.
-	void spnSizOnChanged(int _Val); // Size 'Ghanged'.
-	void btnGenOnPressed(void); // Generate 'Pressed'.
 	void btnClrWallOnPressed(void); // Color wall 'Pressed'
 	void btnClrPathOnPressed(void); // Color path 'Pressed'
 	void btnClrRecPathOnPressed(void); // Color recursive path 'Pressed'
 	void btnClrBfsPathOnPressed(void); // Color BFS path 'Pressed'
 	void btnClrCrosOnPressed(void); // Color crossover 'Pressed'
-	void chkFadeOnPressed(void); // Fade 'Pressed'
-	void btnClrFadeSOnPressed(void); // Color fade start 'Pressed'
-	void btnClrFadeEOnPressed(void); // Color fade end 'Pressed'
 	void btnClrRstOnPressed(void); // Color reset 'Pressed'
+	void btnAlg1OnPressed(void); // Algo1 'Pressed'.
+	void btnAlg2OnPressed(void); // Algo2 'Pressed'.
+	void btnAlg3OnPressed(void); // Algo3 'Pressed'.
+	void spnSizOnChanged(int _Val); // Size 'Ghanged'.
+	void btnGenOnPressed(void); // Generate 'Pressed'.
+	void btnGenSaveOnPressed(void); // Save generated 'Pressed'.
+	void btnGenLoadOnPressed(void); // Load generated 'Pressed'.
 	void btnSolvOnPressed(void); // Solve 'Pressed'.
+	void btnSolvSaveOnPressed(void); // Save solved 'Pressed'.
 	// UI window events..
 	void resizeEvent(QResizeEvent *_pQResizeEvent); // Window size change.
 	// Functions..
 	void ClrRst(void); // Reset colors.
 	int ViewImage(const char *_Filename); // Display image file.
+    void ChangeDisplayedColor(void); //auris added
 };
 
 #endif // _MAINWINDOW_H_
 
-//------------------------
+
+
+//-----------
