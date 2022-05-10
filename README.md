@@ -32,6 +32,8 @@ Programmi kasutamiseks on vajalik alla tõmmata kõik .c programmifailid ning ko
 
 Terminali käsk näeb välja midagi sellist:
 
+```shell
 gcc main.c ellermaze.c treemaze.c dead.c findExits.c rec.c manageFiles.c mazeBMP.c bfs.c -o maze -Wall
- 
+```
+
 NB! Failinimed ning nende arv võib muutuda, käsku tuleb muuta vastavalt.
